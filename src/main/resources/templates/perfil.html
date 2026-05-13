@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AppCelulares - Mi Perfil</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+  </head>
+  <body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+      <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}"
+          ><i class="bi bi-phone"></i> AppCelulares</a
+        >
+        <div class="d-flex align-items-center">
+          <span class="navbar-text text-white me-3">Mi Perfil</span>
+          <a
+            th:href="@{/logout}"
+            class="btn btn-outline-light btn-sm"
+            title="Cerrar Sesión"
+          >
+            <i class="bi bi-box-arrow-right"></i> Salir
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="row">
+        <!-- Tarjeta Izquierda: Datos del Usuario -->
+        <div class="col-md-4 mb-4">
+          <div class="card shadow-sm h-100 border-0">
+            <div class="card-body">
+              <h5 class="card-title border-bottom pb-2 mb-3">
+                <i class="bi bi-person-badge text-primary"></i> Datos del
+                Usuario
+              </h5>
+              <p>
+                <strong>Nombres:</strong>
+                <span
+                  th:text="${usuario.nombres + ' ' + usuario.apellidos}"
+                ></span>
+              </p>
+              <p>
+                <strong>Correo:</strong>
+                <span th:text="${usuario.correo}"></span>
+              </p>
+              <p>
+                <strong>Rol:</strong>
+                <span
+                  class="badge bg-secondary"
+                  th:text="${usuario.rol}"
+                ></span>
+              </p>
+
+              <div class="mt-4">
+                <a
+                  th:href="@{/perfil/eliminarCuenta}"
+                  class="btn btn-danger w-100 fw-bold"
+                  onclick="
+                    return confirm(
+                      'ATENCIÓN: ¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer y borrará todo tu historial.',
+                    );
+                  "
+                >
+                  <i class="bi bi-trash"></i> Eliminar mi cuenta
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta Derecha: Métodos de Pago -->
+        <div class="col-md-8 mb-4">
+          <div class="card shadow-sm h-100 border-0">
+            <div class="card-body">
+              <div
+                class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3"
+              >
+                <h5 class="card-title m-0">
+                  <i class="bi bi-wallet2 text-primary"></i> Mis Métodos de Pago
+                </h5>
+                <button
+                  class="btn btn-sm btn-primary fw-bold"
+                  data-bs-toggle="modal"
+                  data-bs-target="#modalPago"
+                >
+                  <i class="bi bi-plus-lg"></i> Agregar Método
+                </button>
+              </div>
+
+              <!-- Tabla de Formas de Pago -->
+              <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                  <thead>
+                    <tr>
+                      <th>Tipo</th>
+                      <th>Detalle (Número / Correo)</th>
+                      <th>Vencimiento</th>
+                      <th class="text-center">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr th:each="pago : ${formasPago}">
+                      <td>
+                        <!-- Iconos según el tipo -->
+                        <i
+                          th:if="${pago.tipo == 'Visa'}"
+                          class="bi bi-credit-card-2-front-fill text-primary fs-5 me-2"
+                        ></i>
+                        <i
+                          th:if="${pago.tipo == 'Mastercard'}"
+                          class="bi bi-credit-card-fill text-warning fs-5 me-2"
+                        ></i>
+                        <i
+                          th:if="${pago.tipo == 'PayPal'}"
+                          class="bi bi-paypal text-info fs-5 me-2"
+                        ></i>
+                        <span th:text="${pago.tipo}">Tipo</span>
+                      </td>
+                      <td th:text="${pago.numero}">**** 1234</td>
+                      <td th:text="${pago.fechaExpiracion}">12/28</td>
+                      <td class="text-center">
+                        <a
+                          th:href="@{/perfil/pago/eliminar/{id}(id=${pago.id})}"
+                          class="btn btn-sm btn-outline-danger"
+                          onclick="
+                            return confirm('¿Eliminar este método de pago?');
+                          "
+                        >
+                          <i class="bi bi-trash"></i>
+                        </a>
+                      </td>
+                    </tr>
+                    <!-- Mensaje si no hay pagos guardados -->
+                    <tr th:if="${#lists.isEmpty(formasPago)}">
+                      <td colspan="4" class="text-center text-muted py-3">
+                        No tienes métodos de pago registrados.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Nuevo Método de Pago -->
+    <div class="modal fade" id="modalPago" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content border-0">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-credit-card"></i> Nuevo Método de Pago
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <!-- Formulario para agregar nuevo método de pago -->
+          <form
+            th:action="@{/perfil/pago/guardar}"
+            th:object="${nuevaFormaPago}"
+            method="post"
+          >
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label">Red / Plataforma</label>
+                <select
+                  class="form-select"
+                  th:field="*{tipo}"
+                  id="tipoPago"
+                  onchange="cambiarFormulario()"
+                >
+                  <option value="Visa">Visa</option>
+                  <option value="Mastercard">Mastercard</option>
+                  <option value="PayPal">PayPal</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label" id="lblDetalle"
+                  >Número de Tarjeta</label
+                >
+                <!-- Campo de entrada para el número de tarjeta o correo de PayPal -->
+                <input
+                  type="text"
+                  class="form-control"
+                  th:field="*{numero}"
+                  id="inputDetalle"
+                  placeholder="0000 0000 0000 0000"
+                  required
+                />
+              </div>
+
+              <div class="mb-3" id="divExpiracion">
+                <label class="form-label">Fecha de Expiración</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  th:field="*{fechaExpiracion}"
+                  placeholder="MM/AA"
+                />
+              </div>
+
+              <!-- Alerta informativa para PayPal -->
+              <div id="alertaPaypal" class="alert alert-info py-2 d-none">
+                <i class="bi bi-info-circle"></i> Serás redirigido a PayPal en
+                tu próxima compra para validar el correo.
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary fw-bold">
+                Guardar Pago
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Script para cambiar el formulario según el tipo de pago -->
+    <script>
+      function cambiarFormulario() {
+        const seleccion = document.getElementById("tipoPago").value;
+        const lblDetalle = document.getElementById("lblDetalle");
+        const inputDetalle = document.getElementById("inputDetalle");
+        const divExpiracion = document.getElementById("divExpiracion");
+        const alertaPaypal = document.getElementById("alertaPaypal");
+
+        if (seleccion === "PayPal") {
+          lblDetalle.innerText = "Correo electrónico de PayPal";
+          inputDetalle.placeholder = "tu@correo.com";
+          inputDetalle.type = "email";
+          divExpiracion.classList.add("d-none"); // Ocultamos la fecha
+          alertaPaypal.classList.remove("d-none"); // Mostramos la alerta
+        } else {
+          lblDetalle.innerText = "Número de Tarjeta";
+          inputDetalle.placeholder = "0000 0000 0000 0000";
+          inputDetalle.type = "text";
+          divExpiracion.classList.remove("d-none"); // Mostramos la fecha
+          alertaPaypal.classList.add("d-none"); // Ocultamos la alerta
+        }
+      }
+    </script>
+  </body>
+</html>

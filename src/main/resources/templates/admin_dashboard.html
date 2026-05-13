@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AppCelulares - Admin Panel</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+  </head>
+  <body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
+      <div class="container-fluid">
+        <a class="navbar-brand fw-bold" th:href="@{/}">
+          <i class="bi bi-phone"></i> AppCelulares
+          <span class="badge bg-danger ms-2">Admin</span>
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#adminNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="adminNav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <span class="nav-link active text-white"
+                ><i class="bi bi-shield-check"></i> Modo Gerencial</span
+              >
+            </li>
+          </ul>
+          <!-- Botón de Cerrar Sesión -->
+          <a th:href="@{/logout}" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid px-4">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3"
+          >
+            <h4 class="m-0 fw-bold">
+              <i class="bi bi-graph-up-arrow text-primary"></i> Reporte de
+              Inventario Valorizado
+            </h4>
+            <!-- Buscador visual -->
+            <form class="d-flex w-100" style="max-width: 300px">
+              <div class="input-group">
+                <input
+                  class="form-control"
+                  type="search"
+                  placeholder="Buscar proveedor..."
+                />
+                <button class="btn btn-primary" type="button">
+                  <i class="bi bi-search"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Tabla Dinámica -->
+          <div class="table-responsive">
+            <table
+              class="table table-hover table-bordered align-middle text-center"
+            >
+              <thead class="table-dark">
+                <tr>
+                  <th>Proveedor</th>
+                  <th>Marca y Modelo</th>
+                  <th>Stock Disponible</th>
+                  <th>Valorización (S/)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Bucle de Thymeleaf para recorrer todos los celulares -->
+                <tr th:each="celular : ${inventarioGlobal}">
+                  <!-- Accedemos al objeto proveedor vinculado a este celular -->
+                  <td class="fw-bold text-start">
+                    <i class="bi bi-shop text-muted"></i>
+                    <span
+                      th:text="${celular.proveedor.nombres + ' ' + celular.proveedor.apellidos}"
+                      >TechStore SAC</span
+                    >
+                  </td>
+                  <td th:text="${celular.marca + ' ' + celular.modelo}">
+                    Samsung Galaxy S23 Ultra
+                  </td>
+
+                  <td>
+                    <span
+                      class="badge bg-success fs-6"
+                      th:text="${celular.stock}"
+                      >45</span
+                    >
+                  </td>
+
+                  <!-- Multiplicación dinámica -->
+                  <td
+                    class="text-success fw-bold"
+                    th:text="'S/ ' + ${#numbers.formatDecimal(celular.precio * celular.stock, 1, 'COMMA', 2, 'POINT')}"
+                  >
+                    S/ 180,000
+                  </td>
+
+                  <!-- Fila por si la base de datos está vacía -->
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(inventarioGlobal)}">
+                  <td colspan="4" class="text-center text-muted py-4">
+                    No hay celulares registrados en el sistema.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

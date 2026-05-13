@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AppCelulares - Catálogo</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <style>
+      .product-img {
+        height: 250px;
+        object-fit: contain;
+        padding: 1rem;
+        background-color: #f8f9fa;
+      }
+    </style>
+  </head>
+  <body class="bg-light">
+    <!-- Navbar -->
+    <nav
+      class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow-sm"
+    >
+      <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}"
+          ><i class="bi bi-phone"></i> AppCelulares</a
+        >
+
+        <div class="d-flex align-items-center">
+          <!-- Botones de inicio de sesión y registro -->
+          <div th:if="${session.usuarioId == null}">
+            <a
+              th:href="@{/login}"
+              class="btn btn-light btn-sm text-primary fw-bold"
+            >
+              <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+            </a>
+            <a th:href="@{/registro}" class="btn btn-outline-light btn-sm ms-2"
+              >Regístrate</a
+            >
+          </div>
+
+          <!-- Botón de Cerrar Sesión -->
+          <div th:if="${session.usuarioId != null}">
+            <span class="text-white me-3 fw-bold"
+              >Hola, <span th:text="${session.usuarioNombre}"></span
+            ></span>
+            <!-- Botones de navegación según el rol del usuario -->
+            <a
+              th:if="${session.usuarioRol == 'COMPRADOR'}"
+              th:href="@{/perfil}"
+              class="btn btn-outline-light btn-sm"
+            >
+              <i class="bi bi-person"></i> Mi Perfil
+            </a>
+            <a
+              th:if="${session.usuarioRol == 'PROVEEDOR'}"
+              th:href="@{/proveedor/dashboard}"
+              class="btn btn-outline-light btn-sm"
+            >
+              <i class="bi bi-shop"></i> Mi Inventario
+            </a>
+            <a
+              th:if="${session.usuarioRol == 'ADMIN'}"
+              th:href="@{/admin/dashboard}"
+              class="btn btn-dark btn-sm"
+            >
+              <i class="bi bi-shield-lock"></i> Panel Admin
+            </a>
+            <a
+              th:href="@{/logout}"
+              class="btn btn-danger btn-sm ms-2"
+              title="Cerrar Sesión"
+            >
+              <i class="bi bi-box-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container my-5">
+      <div class="text-center mb-5">
+        <h2 class="fw-bold">Catálogo de Celulares</h2>
+        <div class="row justify-content-center mt-3">
+          <div class="col-md-6">
+            <div class="input-group input-group-lg shadow-sm">
+              <span class="input-group-text bg-white"
+                ><i class="bi bi-search"></i
+              ></span>
+              <input
+                type="text"
+                class="form-control border-start-0"
+                placeholder="Buscar marca o modelo..."
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grilla de Productos -->
+      <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div
+          th:if="${#lists.isEmpty(celulares)}"
+          class="col-12 text-center text-muted mt-5"
+        >
+          <i class="bi bi-inbox fs-1"></i>
+          <h4>Aún no hay celulares publicados.</h4>
+        </div>
+
+        <div class="col" th:each="celular : ${celulares}">
+          <div class="card h-100 shadow-sm border-0">
+            <img
+              th:if="${celular.imagenUrl != null and celular.imagenUrl != ''}"
+              th:src="${celular.imagenUrl}"
+              class="card-img-top product-img"
+              alt="Celular"
+            />
+            <img
+              th:unless="${celular.imagenUrl != null and celular.imagenUrl != ''}"
+              th:src="@{'https://via.placeholder.com/300x400?text=' + ${celular.marca}}"
+              class="card-img-top product-img"
+              alt="Celular sin foto"
+            />
+
+            <div class="card-body">
+              <h5
+                class="card-title fw-bold"
+                th:text="${celular.marca + ' ' + celular.modelo}"
+              >
+                Marca Modelo
+              </h5>
+              <h4
+                class="text-success fw-bold"
+                th:text="'S/ ' + ${#numbers.formatDecimal(celular.precio, 1, 'COMMA', 2, 'POINT')}"
+              >
+                S/ 0.00
+              </h4>
+              <span
+                class="badge bg-primary mb-2"
+                th:text="'Stock: ' + ${celular.stock} + ' unidades'"
+                >Stock: 0</span
+              >
+              <p class="card-text text-muted small">
+                <i class="bi bi-shop"></i> Vendido por:
+                <span th:text="${celular.proveedor.nombres}">Proveedor</span>
+              </p>
+
+              <!-- Promedio de Estrellas Visual -->
+              <div class="text-warning small mb-2">
+                <i class="bi bi-star-fill"></i> Promedio de usuarios
+                <span
+                  class="text-dark ms-1"
+                  th:text="'(' + ${#lists.size(celular.resenas)} + ' opiniones)'"
+                ></span>
+              </div>
+            </div>
+
+            <div class="card-footer bg-white border-top-0 d-grid gap-2">
+              <a
+                th:href="${session.usuarioId == null ? '/login' : '#'}"
+                class="btn btn-primary fw-bold"
+              >
+                <i class="bi bi-cart-plus"></i> Comprar
+              </a>
+              <!-- Botón para ver comentarios -->
+              <button
+                class="btn btn-outline-secondary"
+                data-bs-toggle="modal"
+                th:data-bs-target="'#modalComentarios-' + ${celular.id}"
+              >
+                <i class="bi bi-chat-text"></i> Ver / Dejar Comentario
+              </button>
+            </div>
+          </div>
+
+          <!-- Modal de Comentarios -->
+          <div
+            class="modal fade"
+            th:id="'modalComentarios-' + ${celular.id}"
+            tabindex="-1"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog modal-dialog-scrollable">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title fw-bold">
+                    Opiniones: <span th:text="${celular.modelo}"></span>
+                  </h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div class="modal-body">
+                  <!-- Formulario para dejar reseña (Solo visible si es COMPRADOR logueado) -->
+                  <div
+                    th:if="${session.usuarioRol == 'COMPRADOR'}"
+                    class="card bg-light border-0 mb-4 p-3"
+                  >
+                    <h6 class="fw-bold mb-3">
+                      <i class="bi bi-pencil"></i> Deja tu opinión
+                    </h6>
+                    <!-- Formulario para dejar reseña -->
+                    <form th:action="@{/resenas/guardar}" method="post">
+                      <input
+                        type="hidden"
+                        name="celularId"
+                        th:value="${celular.id}"
+                      />
+
+                      <div class="mb-2">
+                        <label class="form-label small">Calificación</label>
+                        <select
+                          name="estrellas"
+                          class="form-select form-select-sm text-warning fw-bold"
+                          required
+                        >
+                          <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                          <option value="4">⭐⭐⭐⭐ Muy Bueno</option>
+                          <option value="3">⭐⭐⭐ Regular</option>
+                          <option value="2">⭐⭐ Malo</option>
+                          <option value="1">⭐ Pésimo</option>
+                        </select>
+                      </div>
+                      <div class="mb-2">
+                        <textarea
+                          name="comentario"
+                          class="form-control form-control-sm"
+                          rows="2"
+                          placeholder="Escribe tu experiencia..."
+                          required
+                        ></textarea>
+                      </div>
+                      <button
+                        type="submit"
+                        class="btn btn-sm btn-success w-100 fw-bold"
+                      >
+                        Publicar Comentario
+                      </button>
+                    </form>
+                  </div>
+
+                  <!-- Mensaje para invitados -->
+                  <div
+                    th:if="${session.usuarioId == null}"
+                    class="alert alert-warning text-center small py-2"
+                  >
+                    Debes
+                    <a th:href="@{/login}" class="alert-link">iniciar sesión</a>
+                    como comprador para dejar una opinión.
+                  </div>
+
+                  <!-- Listado de reseñas -->
+                  <div class="list-group list-group-flush mt-2">
+                    <div
+                      th:if="${#lists.isEmpty(celular.resenas)}"
+                      class="text-center text-muted small py-3"
+                    >
+                      Nadie ha comentado aún. ¡Sé el primero!
+                    </div>
+
+                    <!-- Bucle de reseñas de la BD -->
+                    <div
+                      class="list-group-item px-0"
+                      th:each="resena : ${celular.resenas}"
+                    >
+                      <div
+                        class="d-flex justify-content-between align-items-center"
+                      >
+                        <h6
+                          class="mb-1 fw-bold"
+                          th:text="${resena.comprador.nombres}"
+                        >
+                          Nombre Usuario
+                        </h6>
+
+                        <div>
+                          <small
+                            class="text-warning fw-bold"
+                            th:text="${resena.estrellas + ' ⭐'}"
+                          ></small>
+
+                          <!-- Botones de edición y eliminación -->
+                          <div
+                            class="d-inline-block ms-2"
+                            th:if="${session.usuarioId == resena.comprador.id}"
+                          >
+                            <!-- Botón de editar -->
+                            <button
+                              class="btn btn-sm btn-link text-primary p-0"
+                              title="Editar"
+                              data-bs-toggle="collapse"
+                              th:data-bs-target="'#editResena-' + ${resena.id}"
+                            >
+                              <i class="bi bi-pencil"></i>
+                            </button>
+                            <!-- Botón de eliminar -->
+                            <a
+                              th:href="@{/resenas/eliminar/{id}(id=${resena.id})}"
+                              class="btn btn-sm btn-link text-danger p-0 ms-1"
+                              title="Eliminar"
+                              onclick="
+                                return confirm(
+                                  '¿Seguro que deseas borrar tu comentario?',
+                                );
+                              "
+                            >
+                              <i class="bi bi-trash"></i>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                      <p
+                        class="mb-1 text-muted small"
+                        th:text="${resena.comentario}"
+                      >
+                        Texto del comentario...
+                      </p>
+
+                      <!-- Formulario de edición -->
+                      <div
+                        th:if="${session.usuarioId == resena.comprador.id}"
+                        class="collapse mt-2"
+                        th:id="'editResena-' + ${resena.id}"
+                      >
+                        <div class="card card-body bg-light p-2 border-0">
+                          <form th:action="@{/resenas/editar}" method="post">
+                            <!-- Campo oculto para el ID de la reseña -->
+                            <input
+                              type="hidden"
+                              name="id"
+                              th:value="${resena.id}"
+                            />
+                            <div class="input-group input-group-sm mb-2">
+                              <select
+                                name="estrellas"
+                                class="form-select text-warning fw-bold"
+                                style="max-width: 80px"
+                                required
+                              >
+                                <option
+                                  value="5"
+                                  th:selected="${resena.estrellas == 5}"
+                                >
+                                  5 ⭐
+                                </option>
+                                <option
+                                  value="4"
+                                  th:selected="${resena.estrellas == 4}"
+                                >
+                                  4 ⭐
+                                </option>
+                                <option
+                                  value="3"
+                                  th:selected="${resena.estrellas == 3}"
+                                >
+                                  3 ⭐
+                                </option>
+                                <option
+                                  value="2"
+                                  th:selected="${resena.estrellas == 2}"
+                                >
+                                  2 ⭐
+                                </option>
+                                <option
+                                  value="1"
+                                  th:selected="${resena.estrellas == 1}"
+                                >
+                                  1 ⭐
+                                </option>
+                              </select>
+                              <input
+                                type="text"
+                                name="comentario"
+                                class="form-control"
+                                th:value="${resena.comentario}"
+                                required
+                              />
+                              <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check2"></i> Guardar
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                      <!-- Fin del formulario de edición -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- FIN DEL MODAL DE COMENTARIOS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Comentarios -->
+    <div
+      class="modal fade"
+      id="modalComentarios"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-bold">Opiniones del Producto</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <!-- Mensaje para usuarios no autenticados -->
+            <div
+              th:if="${session.usuarioId == null}"
+              class="alert alert-warning text-center small py-2"
+            >
+              Debes
+              <a th:href="@{/login}" class="alert-link">iniciar sesión</a> para
+              dejar una opinión.
+            </div>
+
+            <!-- Listado de reseñas -->
+            <div class="list-group list-group-flush mt-2">
+              <div class="list-group-item px-0">
+                <div class="d-flex justify-content-between">
+                  <h6 class="mb-1 fw-bold">Usuario Anónimo</h6>
+                  <small class="text-warning"
+                    ><i class="bi bi-star-fill"></i
+                    ><i class="bi bi-star-fill"></i
+                    ><i class="bi bi-star-fill"></i
+                  ></small>
+                </div>
+                <p class="mb-1 text-muted">
+                  Aún no hemos conectado las reseñas a la BD, pero pronto
+                  estarán aquí.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
