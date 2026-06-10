@@ -55,6 +55,13 @@
               <i class="bi bi-person"></i> Mi Perfil
             </a>
             <a
+              th:if="${session.usuarioRol == 'COMPRADOR'}"
+              th:href="@{/carrito}"
+              class="btn btn-warning btn-sm ms-2"
+            >
+              <i class="bi bi-cart3"></i> Mi Carrito
+            </a>
+            <a
               th:if="${session.usuarioRol == 'PROVEEDOR'}"
               th:href="@{/proveedor/dashboard}"
               class="btn btn-outline-light btn-sm"
@@ -182,11 +189,21 @@
 
             <div class="card-footer bg-white border-top-0 d-grid gap-2">
               <a
-                th:href="${session.usuarioId == null ? '/login' : '#'}"
+                th:if="${session.usuarioId == null}"
+                th:href="@{/login}"
                 class="btn btn-primary fw-bold"
               >
-                <i class="bi bi-cart-plus"></i> Comprar
+                <i class="bi bi-cart-plus"></i> Iniciar sesión para comprar
               </a>
+
+              <a
+                th:if="${session.usuarioId != null}"
+                th:href="@{/carrito/agregar/{id}(id=${celular.id})}"
+                class="btn btn-primary fw-bold"
+              >
+                <i class="bi bi-cart-plus"></i> Agregar al carrito
+              </a>
+
               <button
                 class="btn btn-outline-secondary"
                 data-bs-toggle="modal"

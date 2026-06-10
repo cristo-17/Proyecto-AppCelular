@@ -23,6 +23,7 @@ public class CelularService {
         return celularRepository.findByProveedorId(proveedorId);
     }
 
+    // Método para buscar un celular por su ID
     public Optional<Celular> buscarPorId(Long id) {
         return celularRepository.findById(id);
     }
