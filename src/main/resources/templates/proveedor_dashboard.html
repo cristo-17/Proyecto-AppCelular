@@ -35,6 +35,36 @@
     </nav>
 
     <div class="container-fluid px-4">
+      <!-- Mensaje de error de validación -->
+      <div
+        th:if="${errorValidacion}"
+        class="alert alert-danger alert-dismissible fade show shadow-sm"
+        role="alert"
+      >
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span th:text="${errorValidacion}"></span>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      <!-- Mensaje de éxito -->
+      <div
+        th:if="${exito}"
+        class="alert alert-success alert-dismissible fade show shadow-sm"
+        role="alert"
+      >
+        <i class="bi bi-check-circle-fill"></i> <span th:text="${exito}"></span>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+
       <!-- Tarjetas de Resumen (Métricas Dinámicas) -->
       <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
         <div class="col">
@@ -71,7 +101,14 @@
             <div class="card-body text-center">
               <i class="bi bi-star-fill fs-1 mb-2"></i>
               <h5 class="card-title">Calificación Promedio</h5>
-              <h2 class="fw-bold">4.8 <i class="bi bi-star-fill fs-4"></i></h2>
+              <h2 class="fw-bold">
+                <!-- Usamos formatDecimal para que siempre muestre 1 decimal -->
+                <span
+                  th:text="${#numbers.formatDecimal(promedioEstrellas, 1, 'COMMA', 1, 'POINT')}"
+                  >4.9</span
+                >
+                <i class="bi bi-star-fill fs-4"></i>
+              </h2>
             </div>
           </div>
         </div>

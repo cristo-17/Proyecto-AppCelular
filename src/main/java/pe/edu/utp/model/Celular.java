@@ -2,6 +2,10 @@ package pe.edu.utp.model;
 
 import jakarta.persistence.*;
 import java.util.List;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 @Entity
 @Table(name = "celulares")
@@ -11,15 +15,21 @@ public class Celular {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "La marca es obligatoria")
     @Column(nullable = false, length = 100)
     private String marca;
 
+    @NotBlank(message = "El modelo es obligatorio")
     @Column(nullable = false, length = 100)
     private String modelo;
 
+    @NotNull(message = "El precio no puede estar vacío")
+    @Positive(message = "El precio debe ser mayor a cero")
     @Column(nullable = false)
     private Double precio;
 
+    @NotNull(message = "El stock no puede estar vacío")
+    @Min(value = 0, message = "El stock no puede ser negativo")
     @Column(nullable = false)
     private Integer stock;
 

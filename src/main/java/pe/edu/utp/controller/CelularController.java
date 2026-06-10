@@ -5,9 +5,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import pe.edu.utp.model.Celular;
-import pe.edu.utp.model.Usuario;
 import pe.edu.utp.service.CelularService;
 import pe.edu.utp.service.UsuarioService;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -40,33 +40,63 @@ public class CelularController {
     // Muestra el Dashboard del Proveedor
     @GetMapping("/proveedor/dashboard")
     public String dashboardProveedor(Model model, jakarta.servlet.http.HttpSession session) {
-        // Obtiene el ID del usuario directamente de la sesión activa
         Long usuarioId = (Long) session.getAttribute("usuarioId");
 
-        // Si no inicia sesión o no es proveedor, lo botamos al login
         if (usuarioId == null || !"PROVEEDOR".equals(session.getAttribute("usuarioRol"))) {
             return "redirect:/login";
         }
 
         // Trae solo los celulares de este proveedor
-        List<Celular> misCelulares = celularService.listarPorProveedor(usuarioId);
+        List<pe.edu.utp.model.Celular> misCelulares = celularService.listarPorProveedor(usuarioId);
+
+        // --- NUEVA LÓGICA: Calcular el promedio exacto de estrellas ---
+        double sumaEstrellas = 0;
+        int totalResenas = 0;
+
+        for (pe.edu.utp.model.Celular celular : misCelulares) {
+            if (celular.getResenas() != null) {
+                for (pe.edu.utp.model.Resena resena : celular.getResenas()) {
+                    sumaEstrellas += resena.getEstrellas();
+                    totalResenas++;
+                }
+            }
+        }
+
+        // Evitamos dividir entre cero si nadie ha comentado aún
+        double promedio = (totalResenas > 0) ? (sumaEstrellas / totalResenas) : 0.0;
+        // ---------------------------------------------------------------
 
         model.addAttribute("celulares", misCelulares);
-        model.addAttribute("nuevoCelular", new Celular());
+        model.addAttribute("promedioEstrellas", promedio); // Enviamos el número al HTML
+        model.addAttribute("nuevoCelular", new pe.edu.utp.model.Celular());
         return "proveedor_dashboard";
     }
 
     // Guarda un nuevo celular
     @PostMapping("/proveedor/guardar")
-    public String guardarCelular(@ModelAttribute Celular celular, jakarta.servlet.http.HttpSession session) {
-        Long usuarioId = (Long) session.getAttribute("usuarioId");
+    public String guardarCelular(@Valid @ModelAttribute("nuevoCelular") pe.edu.utp.model.Celular celular,
+            org.springframework.validation.BindingResult result,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes,
+            jakarta.servlet.http.HttpSession session) {
 
-        if (usuarioId != null) {
-            Usuario proveedor = usuarioService.buscarPorId(usuarioId).orElse(null);
-            if (proveedor != null) {
-                celular.setProveedor(proveedor); // Vincula el celular con el proveedor logueado
-                celularService.guardar(celular); // Inserta en MySQL
-            }
+        Long usuarioId = (Long) session.getAttribute("usuarioId");
+        if (usuarioId == null)
+            return "redirect:/login";
+
+        // Si hay errores de validación, redirige de vuelta al dashboard con un mensaje
+        // de error
+        if (result.hasErrors()) {
+            redirectAttributes.addFlashAttribute("errorValidacion",
+                    "Error: No se pudo guardar. Verifica que el precio y stock sean mayores a cero y los campos no estén vacíos.");
+            return "redirect:/proveedor/dashboard";
+        }
+
+        // Si todo está correcto, guarda normalmente
+        pe.edu.utp.model.Usuario proveedor = usuarioService.buscarPorId(usuarioId).orElse(null);
+        if (proveedor != null) {
+            celular.setProveedor(proveedor); // Asocia el celular al proveedor actual
+            celularService.guardar(celular); // Guarda el nuevo celular en la base de datos
+            redirectAttributes.addFlashAttribute("exito", "¡Celular publicado/actualizado correctamente!");
         }
         return "redirect:/proveedor/dashboard";
     }
