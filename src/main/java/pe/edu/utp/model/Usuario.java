@@ -16,10 +16,12 @@ public class Usuario {
     private Long id;
 
     @NotBlank(message = "El nombre es obligatorio")
+    @Pattern(regexp = "^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$", message = "El nombre solo debe contener letras")
     @Column(nullable = false, length = 100)
     private String nombres;
 
     @NotBlank(message = "El apellido es obligatorio")
+    @Pattern(regexp = "^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$", message = "El apellido solo debe contener letras")
     @Column(nullable = false, length = 100)
     private String apellidos;
 
