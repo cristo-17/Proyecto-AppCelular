@@ -39,4 +39,14 @@ public class UsuarioService {
     public void eliminar(Long id) {
         usuarioRepository.deleteById(id);
     }
+
+    // Método para verificar si un correo ya existe en la base de datos
+    public boolean existeCorreo(String correo) {
+        // reutilizamos el método buscarPorCorreo para verificar si el correo ya está
+        // registrado
+        Usuario usuarioEncontrado = buscarPorCorreo(correo);
+        // si usuarioEncontrado es diferente de null, significa que el correo ya existe,
+        // por lo tanto retornamos true, de lo contrario retornamos false
+        return usuarioEncontrado != null;
+    }
 }

@@ -22,7 +22,6 @@
     </style>
   </head>
   <body class="bg-light">
-    <!-- Navbar -->
     <nav
       class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow-sm"
     >
@@ -32,7 +31,6 @@
         >
 
         <div class="d-flex align-items-center">
-          <!-- Botones de inicio de sesión y registro -->
           <div th:if="${session.usuarioId == null}">
             <a
               th:href="@{/login}"
@@ -45,12 +43,10 @@
             >
           </div>
 
-          <!-- Botón de Cerrar Sesión -->
           <div th:if="${session.usuarioId != null}">
             <span class="text-white me-3 fw-bold"
               >Hola, <span th:text="${session.usuarioNombre}"></span
             ></span>
-            <!-- Botones de navegación según el rol del usuario -->
             <a
               th:if="${session.usuarioRol == 'COMPRADOR'}"
               th:href="@{/perfil}"
@@ -103,7 +99,6 @@
         </div>
       </div>
 
-      <!-- Grilla de Productos -->
       <div class="row row-cols-1 row-cols-md-3 g-4">
         <div
           th:if="${#lists.isEmpty(celulares)}"
@@ -146,12 +141,36 @@
                 th:text="'Stock: ' + ${celular.stock} + ' unidades'"
                 >Stock: 0</span
               >
-              <p class="card-text text-muted small">
+
+              <div class="card-text text-muted small mb-3">
+                <ul
+                  class="list-unstyled small text-muted mb-2 bg-light p-2 rounded"
+                >
+                  <li>
+                    <i class="bi bi-memory"></i> <strong>RAM:</strong>
+                    <span th:text="${celular.ram}"></span> |
+                    <strong>Almacenamiento:</strong>
+                    <span th:text="${celular.almacenamiento}"></span>
+                  </li>
+                  <li>
+                    <i class="bi bi-cpu"></i> <strong>CPU:</strong>
+                    <span th:text="${celular.procesador}"></span>
+                  </li>
+                  <li>
+                    <i class="bi bi-phone"></i> <strong>Pantalla:</strong>
+                    <span th:text="${celular.pantalla}"></span>
+                  </li>
+                  <li>
+                    <i class="bi bi-camera"></i> <strong>Cámara:</strong>
+                    <span th:text="${celular.camaraPrincipal}"></span> |
+                    <i class="bi bi-battery-half"></i>
+                    <span th:text="${celular.bateria}"></span>
+                  </li>
+                </ul>
                 <i class="bi bi-shop"></i> Vendido por:
                 <span th:text="${celular.proveedor.nombres}">Proveedor</span>
-              </p>
+              </div>
 
-              <!-- Promedio de Estrellas Visual -->
               <div class="text-warning small mb-2">
                 <i class="bi bi-star-fill"></i> Promedio de usuarios
                 <span
@@ -168,7 +187,6 @@
               >
                 <i class="bi bi-cart-plus"></i> Comprar
               </a>
-              <!-- Botón para ver comentarios -->
               <button
                 class="btn btn-outline-secondary"
                 data-bs-toggle="modal"
@@ -179,7 +197,6 @@
             </div>
           </div>
 
-          <!-- Modal de Comentarios -->
           <div
             class="modal fade"
             th:id="'modalComentarios-' + ${celular.id}"
@@ -200,7 +217,6 @@
                   ></button>
                 </div>
                 <div class="modal-body">
-                  <!-- Formulario para dejar reseña (Solo visible si es COMPRADOR logueado) -->
                   <div
                     th:if="${session.usuarioRol == 'COMPRADOR'}"
                     class="card bg-light border-0 mb-4 p-3"
@@ -208,14 +224,12 @@
                     <h6 class="fw-bold mb-3">
                       <i class="bi bi-pencil"></i> Deja tu opinión
                     </h6>
-                    <!-- Formulario para dejar reseña -->
                     <form th:action="@{/resenas/guardar}" method="post">
                       <input
                         type="hidden"
                         name="celularId"
                         th:value="${celular.id}"
                       />
-
                       <div class="mb-2">
                         <label class="form-label small">Calificación</label>
                         <select
@@ -248,7 +262,6 @@
                     </form>
                   </div>
 
-                  <!-- Mensaje para invitados -->
                   <div
                     th:if="${session.usuarioId == null}"
                     class="alert alert-warning text-center small py-2"
@@ -258,7 +271,6 @@
                     como comprador para dejar una opinión.
                   </div>
 
-                  <!-- Listado de reseñas -->
                   <div class="list-group list-group-flush mt-2">
                     <div
                       th:if="${#lists.isEmpty(celular.resenas)}"
@@ -267,7 +279,6 @@
                       Nadie ha comentado aún. ¡Sé el primero!
                     </div>
 
-                    <!-- Bucle de reseñas de la BD -->
                     <div
                       class="list-group-item px-0"
                       th:each="resena : ${celular.resenas}"
@@ -281,19 +292,15 @@
                         >
                           Nombre Usuario
                         </h6>
-
                         <div>
                           <small
                             class="text-warning fw-bold"
                             th:text="${resena.estrellas + ' ⭐'}"
                           ></small>
-
-                          <!-- Botones de edición y eliminación -->
                           <div
                             class="d-inline-block ms-2"
                             th:if="${session.usuarioId == resena.comprador.id}"
                           >
-                            <!-- Botón de editar -->
                             <button
                               class="btn btn-sm btn-link text-primary p-0"
                               title="Editar"
@@ -302,7 +309,6 @@
                             >
                               <i class="bi bi-pencil"></i>
                             </button>
-                            <!-- Botón de eliminar -->
                             <a
                               th:href="@{/resenas/eliminar/{id}(id=${resena.id})}"
                               class="btn btn-sm btn-link text-danger p-0 ms-1"
@@ -325,7 +331,6 @@
                         Texto del comentario...
                       </p>
 
-                      <!-- Formulario de edición -->
                       <div
                         th:if="${session.usuarioId == resena.comprador.id}"
                         class="collapse mt-2"
@@ -333,7 +338,6 @@
                       >
                         <div class="card card-body bg-light p-2 border-0">
                           <form th:action="@{/resenas/editar}" method="post">
-                            <!-- Campo oculto para el ID de la reseña -->
                             <input
                               type="hidden"
                               name="id"
@@ -391,62 +395,9 @@
                           </form>
                         </div>
                       </div>
-                      <!-- Fin del formulario de edición -->
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-          <!-- FIN DEL MODAL DE COMENTARIOS -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal de Comentarios -->
-    <div
-      class="modal fade"
-      id="modalComentarios"
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title fw-bold">Opiniones del Producto</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <!-- Mensaje para usuarios no autenticados -->
-            <div
-              th:if="${session.usuarioId == null}"
-              class="alert alert-warning text-center small py-2"
-            >
-              Debes
-              <a th:href="@{/login}" class="alert-link">iniciar sesión</a> para
-              dejar una opinión.
-            </div>
-
-            <!-- Listado de reseñas -->
-            <div class="list-group list-group-flush mt-2">
-              <div class="list-group-item px-0">
-                <div class="d-flex justify-content-between">
-                  <h6 class="mb-1 fw-bold">Usuario Anónimo</h6>
-                  <small class="text-warning"
-                    ><i class="bi bi-star-fill"></i
-                    ><i class="bi bi-star-fill"></i
-                    ><i class="bi bi-star-fill"></i
-                  ></small>
-                </div>
-                <p class="mb-1 text-muted">
-                  Aún no hemos conectado las reseñas a la BD, pero pronto
-                  estarán aquí.
-                </p>
               </div>
             </div>
           </div>

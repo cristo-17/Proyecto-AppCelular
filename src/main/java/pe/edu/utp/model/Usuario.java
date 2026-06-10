@@ -3,6 +3,9 @@ package pe.edu.utp.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "usuarios")
@@ -12,15 +15,21 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "El nombre es obligatorio")
     @Column(nullable = false, length = 100)
     private String nombres;
 
+    @NotBlank(message = "El apellido es obligatorio")
     @Column(nullable = false, length = 100)
     private String apellidos;
 
+    @NotBlank(message = "El correo es obligatorio")
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$", message = "Ingrese un correo válido (ejemplo@correo.com)")
     @Column(nullable = false, length = 150, unique = true)
     private String correo;
 
+    @NotBlank(message = "La contraseña es obligatoria")
+    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     @Column(nullable = false)
     private String contrasena;
 

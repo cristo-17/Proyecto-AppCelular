@@ -14,28 +14,26 @@
     />
   </head>
   <body class="bg-light">
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
       <div class="container-fluid">
         <a class="navbar-brand fw-bold" th:href="@{/}"
           ><i class="bi bi-phone"></i> AppCelulares
-          <span class="badge bg-success ms-2">Proveedor</span>
-        </a>
+          <span class="badge bg-success ms-2">Proveedor</span></a
+        >
         <div class="d-flex align-items-center">
           <span
             class="navbar-text text-white me-3 d-none d-md-block"
             th:text="'Hola, ' + ${session.usuarioNombre}"
             >Hola, Proveedor</span
           >
-          <a th:href="@{/logout}" class="btn btn-outline-light btn-sm">
-            <i class="bi bi-box-arrow-right"></i> Salir
-          </a>
+          <a th:href="@{/logout}" class="btn btn-outline-light btn-sm"
+            ><i class="bi bi-box-arrow-right"></i> Salir</a
+          >
         </div>
       </div>
     </nav>
 
     <div class="container-fluid px-4">
-      <!-- Mensaje de error de validación -->
       <div
         th:if="${errorValidacion}"
         class="alert alert-danger alert-dismissible fade show shadow-sm"
@@ -50,7 +48,6 @@
           aria-label="Close"
         ></button>
       </div>
-      <!-- Mensaje de éxito -->
       <div
         th:if="${exito}"
         class="alert alert-success alert-dismissible fade show shadow-sm"
@@ -65,7 +62,6 @@
         ></button>
       </div>
 
-      <!-- Tarjetas de Resumen (Métricas Dinámicas) -->
       <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
         <div class="col">
           <div class="card bg-primary text-white h-100 shadow border-0">
@@ -86,7 +82,6 @@
             <div class="card-body text-center">
               <i class="bi bi-box-seam fs-1 mb-2"></i>
               <h5 class="card-title">Total en Stock</h5>
-              <!-- Sumatoria del stock de todos los celulares -->
               <h2
                 class="fw-bold"
                 th:text="${#aggregates.sum(celulares.![stock]) ?: 0} + ' Unidades'"
@@ -102,7 +97,6 @@
               <i class="bi bi-star-fill fs-1 mb-2"></i>
               <h5 class="card-title">Calificación Promedio</h5>
               <h2 class="fw-bold">
-                <!-- Usamos formatDecimal para que siempre muestre 1 decimal -->
                 <span
                   th:text="${#numbers.formatDecimal(promedioEstrellas, 1, 'COMMA', 1, 'POINT')}"
                   >4.9</span
@@ -114,7 +108,6 @@
         </div>
       </div>
 
-      <!-- Mi Inventario -->
       <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
           <div
@@ -132,7 +125,6 @@
             </button>
           </div>
 
-          <!-- Tabla de Inventario -->
           <div class="table-responsive">
             <table class="table table-hover align-middle">
               <thead class="table-light">
@@ -146,7 +138,6 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- Bucle para cada celular -->
                 <tr th:each="celular : ${celulares}">
                   <td th:text="'#PROD-' + ${celular.id}">#PROD-001</td>
                   <td class="text-center">
@@ -182,8 +173,8 @@
                       >0</span
                     >
                   </td>
+
                   <td class="text-center">
-                    <!-- Botón EDITAR -->
                     <button
                       class="btn btn-sm btn-outline-primary"
                       title="Editar"
@@ -192,7 +183,6 @@
                     >
                       <i class="bi bi-pencil-square"></i> Editar
                     </button>
-                    <!-- Botón ELIMINAR -->
                     <a
                       th:href="@{/proveedor/eliminar/{id}(id=${celular.id})}"
                       class="btn btn-sm btn-outline-danger"
@@ -205,129 +195,207 @@
                     >
                       <i class="bi bi-trash"></i>
                     </a>
-                  </td>
 
-                  <!-- Modal de Edición -->
-                  <div
-                    class="modal fade"
-                    th:id="'modalEditar-' + ${celular.id}"
-                    tabindex="-1"
-                    aria-hidden="true"
-                  >
-                    <div class="modal-dialog text-start">
-                      <div class="modal-content">
-                        <div class="modal-header bg-primary text-white">
-                          <h5 class="modal-title fw-bold">
-                            <i class="bi bi-pencil-square"></i> Editar Celular
-                          </h5>
-                          <button
-                            type="button"
-                            class="btn-close btn-close-white"
-                            data-bs-dismiss="modal"
-                            aria-label="Close"
-                          ></button>
-                        </div>
-                        <!-- Formulario de Edición -->
-                        <form th:action="@{/proveedor/guardar}" method="post">
-                          <!-- Campo oculto para el ID del celular -->
-                          <input
-                            type="hidden"
-                            name="id"
-                            th:value="${celular.id}"
-                          />
-
-                          <div class="modal-body">
-                            <div class="mb-3">
-                              <label class="form-label">Marca</label>
-                              <input
-                                type="text"
-                                class="form-control"
-                                name="marca"
-                                th:value="${celular.marca}"
-                                required
-                              />
-                            </div>
-                            <div class="mb-3">
-                              <label class="form-label">Modelo</label>
-                              <input
-                                type="text"
-                                class="form-control"
-                                name="modelo"
-                                th:value="${celular.modelo}"
-                                required
-                              />
-                            </div>
-                            <div class="row">
-                              <div class="col-md-6 mb-3">
-                                <label class="form-label">Precio (S/)</label>
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  class="form-control"
-                                  name="precio"
-                                  th:value="${celular.precio}"
-                                  required
-                                />
-                              </div>
-                              <div class="col-md-6 mb-3">
-                                <label class="form-label">Stock Actual</label>
-                                <input
-                                  type="number"
-                                  class="form-control"
-                                  name="stock"
-                                  th:value="${celular.stock}"
-                                  required
-                                />
-                              </div>
-                            </div>
-                            <div class="mb-3">
-                              <label class="form-label">URL de la Imagen</label>
-                              <!-- Campo de entrada para la URL de la imagen -->
-                              <input
-                                type="url"
-                                class="form-control"
-                                name="imagenUrl"
-                                th:value="${celular.imagenUrl}"
-                                th:oninput="'actualizarPreviewEditar(' + ${celular.id} + ', this.value)'"
-                              />
-                            </div>
-
-                            <!-- Previsualización de la Imagen -->
-                            <div
-                              class="text-center bg-light p-2 rounded border mb-3"
-                            >
-                              <p class="small text-muted mb-1">
-                                Previsualización actual:
-                              </p>
-                              <img
-                                th:id="'previewImagenEditar-' + ${celular.id}"
-                                th:src="${celular.imagenUrl != null and celular.imagenUrl != '' ? celular.imagenUrl : 'https://via.placeholder.com/150?text=Sin+Imagen'}"
-                                class="img-thumbnail shadow-sm"
-                                style="max-height: 150px; object-fit: contain"
-                                alt="Vista previa"
-                              />
-                            </div>
-                          </div>
-                          <div class="modal-footer">
+                    <div
+                      class="modal fade text-start"
+                      th:id="'modalEditar-' + ${celular.id}"
+                      tabindex="-1"
+                      aria-hidden="true"
+                    >
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title fw-bold">
+                              <i class="bi bi-pencil-square"></i> Editar Celular
+                            </h5>
                             <button
                               type="button"
-                              class="btn btn-secondary"
+                              class="btn-close btn-close-white"
                               data-bs-dismiss="modal"
-                            >
-                              Cancelar
-                            </button>
-                            <button
-                              type="submit"
-                              class="btn btn-primary fw-bold"
-                            >
-                              Guardar Cambios
-                            </button>
+                              aria-label="Close"
+                            ></button>
                           </div>
-                        </form>
+                          <form th:action="@{/proveedor/guardar}" method="post">
+                            <input
+                              type="hidden"
+                              name="id"
+                              th:value="${celular.id}"
+                            />
+                            <div class="modal-body">
+                              <div class="mb-3">
+                                <label class="form-label">Marca</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  name="marca"
+                                  th:value="${celular.marca}"
+                                  required
+                                />
+                              </div>
+                              <div class="mb-3">
+                                <label class="form-label">Modelo</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  name="modelo"
+                                  th:value="${celular.modelo}"
+                                  required
+                                />
+                              </div>
+                              <div class="row">
+                                <div class="col-md-6 mb-3">
+                                  <label class="form-label">Precio (S/)</label>
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    class="form-control"
+                                    name="precio"
+                                    th:value="${celular.precio}"
+                                    required
+                                  />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                  <label class="form-label">Stock Actual</label>
+                                  <input
+                                    type="number"
+                                    class="form-control"
+                                    name="stock"
+                                    th:value="${celular.stock}"
+                                    required
+                                  />
+                                </div>
+                              </div>
+                              <h6
+                                class="fw-bold text-secondary mt-3 border-bottom pb-1"
+                              >
+                                Especificaciones Técnicas
+                              </h6>
+                              <div class="row">
+                                <div class="col-md-6 mb-2">
+                                  <label class="form-label small"
+                                    >Memoria RAM</label
+                                  >
+                                  <input
+                                    type="text"
+                                    class="form-control form-control-sm"
+                                    name="ram"
+                                    th:value="${celular.ram}"
+                                    required
+                                  />
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                  <label class="form-label small"
+                                    >Almacenamiento</label
+                                  >
+                                  <input
+                                    type="text"
+                                    class="form-control form-control-sm"
+                                    name="almacenamiento"
+                                    th:value="${celular.almacenamiento}"
+                                    required
+                                  />
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="col-md-6 mb-2">
+                                  <label class="form-label small"
+                                    >Pantalla</label
+                                  >
+                                  <input
+                                    type="text"
+                                    class="form-control form-control-sm"
+                                    name="pantalla"
+                                    th:value="${celular.pantalla}"
+                                    required
+                                  />
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                  <label class="form-label small"
+                                    >Procesador</label
+                                  >
+                                  <input
+                                    type="text"
+                                    class="form-control form-control-sm"
+                                    name="procesador"
+                                    th:value="${celular.procesador}"
+                                    required
+                                  />
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="col-md-6 mb-3">
+                                  <label class="form-label small"
+                                    >Cámara Principal</label
+                                  >
+                                  <input
+                                    type="text"
+                                    class="form-control form-control-sm"
+                                    name="camaraPrincipal"
+                                    th:value="${celular.camaraPrincipal}"
+                                    required
+                                  />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                  <label class="form-label small"
+                                    >Batería</label
+                                  >
+                                  <input
+                                    type="text"
+                                    class="form-control form-control-sm"
+                                    name="bateria"
+                                    th:value="${celular.bateria}"
+                                    required
+                                  />
+                                </div>
+                              </div>
+
+                              <div class="mb-3">
+                                <label class="form-label"
+                                  >URL de la Imagen</label
+                                >
+                                <input
+                                  type="url"
+                                  class="form-control"
+                                  name="imagenUrl"
+                                  th:value="${celular.imagenUrl}"
+                                  th:oninput="'actualizarPreviewEditar(' + ${celular.id} + ', this.value)'"
+                                />
+                              </div>
+                              <div
+                                class="text-center bg-light p-2 rounded border mb-3"
+                              >
+                                <p class="small text-muted mb-1">
+                                  Previsualización actual:
+                                </p>
+                                <img
+                                  th:id="'previewImagenEditar-' + ${celular.id}"
+                                  th:src="${celular.imagenUrl != null and celular.imagenUrl != '' ? celular.imagenUrl : 'https://via.placeholder.com/150?text=Sin+Imagen'}"
+                                  class="img-thumbnail shadow-sm"
+                                  style="max-height: 150px; object-fit: contain"
+                                  alt="Vista previa"
+                                />
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button
+                                type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal"
+                              >
+                                Cancelar
+                              </button>
+                              <button
+                                type="submit"
+                                class="btn btn-primary fw-bold"
+                              >
+                                Guardar Cambios
+                              </button>
+                            </div>
+                          </form>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <!-- Fin Del Modal De Edición -->
+                  </td>
                 </tr>
 
                 <tr th:if="${#lists.isEmpty(celulares)}">
@@ -342,7 +410,6 @@
       </div>
     </div>
 
-    <!-- Modal Publicar Celular -->
     <div class="modal fade" id="modalPublicar" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -357,7 +424,6 @@
               aria-label="Close"
             ></button>
           </div>
-          <!-- Formulario de Publicación -->
           <form
             th:action="@{/proveedor/guardar}"
             th:object="${nuevoCelular}"
@@ -393,6 +459,7 @@
                     class="form-control"
                     th:field="*{precio}"
                     placeholder="0.00"
+                    min="0"
                     required
                   />
                 </div>
@@ -403,12 +470,81 @@
                     class="form-control"
                     th:field="*{stock}"
                     placeholder="0"
+                    min="0"
+                    required
+                  />
+                </div>
+              </div>
+              <h6 class="fw-bold text-secondary mt-3 border-bottom pb-1">
+                Especificaciones Técnicas
+              </h6>
+              <div class="row">
+                <div class="col-md-6 mb-2">
+                  <label class="form-label small">Memoria RAM</label>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    th:field="*{ram}"
+                    placeholder="Ej. 8GB"
+                    required
+                  />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label small">Almacenamiento</label>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    th:field="*{almacenamiento}"
+                    placeholder="Ej. 256GB"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-2">
+                  <label class="form-label small">Pantalla</label>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    th:field="*{pantalla}"
+                    placeholder="Ej. 6.7 AMOLED"
+                    required
+                  />
+                </div>
+                <div class="col-md-6 mb-2">
+                  <label class="form-label small">Procesador</label>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    th:field="*{procesador}"
+                    placeholder="Ej. Snapdragon 8 Gen 3"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label small">Cámara Principal</label>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    th:field="*{camaraPrincipal}"
+                    placeholder="Ej. 50MP + 12MP"
+                    required
+                  />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label small">Batería</label>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    th:field="*{bateria}"
+                    placeholder="Ej. 5000 mAh"
                     required
                   />
                 </div>
               </div>
 
-              <!-- URL de la Imagen -->
               <div class="mb-3">
                 <label class="form-label">URL de la Imagen</label>
                 <input
@@ -449,32 +585,24 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Script para previsualizar la imagen del celular en tiempo real -->
     <script>
       function actualizarPrevisualizacion() {
         const inputUrl = document.getElementById("inputImagenUrl").value;
         const imagenPreview = document.getElementById("previewImagen");
-
-        // Si el usuario ha ingresado una URL, la mostramos. Si no, mostramos la imagen por defecto.
         if (inputUrl.trim() !== "") {
           imagenPreview.src = inputUrl;
         } else {
-          // Si el campo está vacío, volvemos a la imagen por defecto
           imagenPreview.src = "https://via.placeholder.com/150?text=Sin+Imagen";
         }
       }
 
-      // Función para actualizar la previsualización en el modal de edición
       function actualizarPreviewEditar(celularId, urlIngresada) {
-        // Busca la imagen exacta del celular que estamos editando
         const imagenPreview = document.getElementById(
           "previewImagenEditar-" + celularId,
         );
-
         if (urlIngresada.trim() !== "") {
           imagenPreview.src = urlIngresada;
         } else {
-          // Si el campo está vacío, volvemos a la imagen por defecto
           imagenPreview.src = "https://via.placeholder.com/150?text=Sin+Imagen";
         }
       }

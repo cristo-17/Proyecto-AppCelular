@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import pe.edu.utp.model.Usuario;
 import pe.edu.utp.service.UsuarioService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
 
 import java.util.List;
 
@@ -34,10 +36,27 @@ public class UsuarioController {
     }
 
     @PostMapping("/registro")
-    public String registrarUsuario(@ModelAttribute Usuario usuario) {
-        // Usa el método guardar de nuestro Service
+    public String registrarUsuario(@Valid @ModelAttribute("usuario") pe.edu.utp.model.Usuario usuario,
+            BindingResult result,
+            Model model) {
+
+        // 1. Si Spring Validator detecta errores (campos vacíos, mal correo, etc.)
+        if (result.hasErrors()) {
+            // Retornamos a la misma vista de registro para mostrar los mensajes en rojo
+            return "registro";
+        }
+
+        // 2. Opcional pero recomendado: Verificar si el correo ya existe en la BD
+        if (usuarioService.existeCorreo(usuario.getCorreo())) {
+            model.addAttribute("errorGlobal", "Este correo ya está registrado.");
+            return "registro";
+        }
+
+        // 3. Si todo está perfecto, guardamos el usuario
         usuarioService.guardar(usuario);
-        return "redirect:/";
+
+        // Redirigimos al login con un parámetro de éxito
+        return "redirect:/login?exito=true";
     }
 
     // Muestra el Dashboard del Administrador

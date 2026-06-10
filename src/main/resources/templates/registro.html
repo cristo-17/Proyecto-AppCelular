@@ -41,54 +41,67 @@
           >
             <div class="row">
               <div class="col-md-6 mb-3">
-                <label class="form-label">Nombres</label>
-
+                <label class="form-label fw-bold">Nombres</label>
                 <input
                   type="text"
                   class="form-control"
                   th:field="*{nombres}"
+                  th:classappend="${#fields.hasErrors('nombres')} ? 'is-invalid' : ''"
                   placeholder="Ej. Juan"
-                  required
                 />
+                <div
+                  th:if="${#fields.hasErrors('nombres')}"
+                  th:errors="*{nombres}"
+                  class="invalid-feedback fw-bold"
+                ></div>
               </div>
+
               <div class="col-md-6 mb-3">
-                <label class="form-label">Apellidos</label>
+                <label class="form-label fw-bold">Apellidos</label>
                 <input
                   type="text"
                   class="form-control"
                   th:field="*{apellidos}"
-                  placeholder="Ej. Pérez"
-                  required
+                  th:classappend="${#fields.hasErrors('apellidos')} ? 'is-invalid' : ''"
+                  placeholder="Ej. Perez"
                 />
+                <div
+                  th:if="${#fields.hasErrors('apellidos')}"
+                  th:errors="*{apellidos}"
+                  class="invalid-feedback fw-bold"
+                ></div>
               </div>
             </div>
             <div class="mb-3">
-              <label class="form-label">Correo Electrónico</label>
-              <div class="input-group">
-                <span class="input-group-text"
-                  ><i class="bi bi-envelope"></i
-                ></span>
-                <input
-                  type="email"
-                  class="form-control"
-                  th:field="*{correo}"
-                  placeholder="tu@correo.com"
-                  required
-                />
-              </div>
+              <label class="form-label fw-bold">Correo Electrónico</label>
+              <input
+                type="text"
+                class="form-control"
+                th:field="*{correo}"
+                th:classappend="${#fields.hasErrors('correo')} ? 'is-invalid' : ''"
+                placeholder="juan@correo.com"
+              />
+              <div
+                th:if="${#fields.hasErrors('correo')}"
+                th:errors="*{correo}"
+                class="invalid-feedback fw-bold"
+              ></div>
             </div>
+
             <div class="mb-3">
-              <label class="form-label">Contraseña</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                <input
-                  type="password"
-                  class="form-control"
-                  th:field="*{contrasena}"
-                  placeholder="********"
-                  required
-                />
-              </div>
+              <label class="form-label fw-bold">Contraseña</label>
+              <input
+                type="password"
+                class="form-control"
+                th:field="*{contrasena}"
+                th:classappend="${#fields.hasErrors('contrasena')} ? 'is-invalid' : ''"
+                placeholder="Mínimo 6 caracteres"
+              />
+              <div
+                th:if="${#fields.hasErrors('contrasena')}"
+                th:errors="*{contrasena}"
+                class="invalid-feedback fw-bold"
+              ></div>
             </div>
 
             <!-- Selector de Rol -->
@@ -98,6 +111,14 @@
                 <option value="COMPRADOR">Quiero comprar celulares</option>
                 <option value="PROVEEDOR">Quiero vender celulares</option>
               </select>
+            </div>
+
+            <div
+              th:if="${errorGlobal}"
+              class="alert alert-danger py-2 text-center shadow-sm"
+            >
+              <i class="bi bi-exclamation-octagon-fill"></i>
+              <span th:text="${errorGlobal}"></span>
             </div>
 
             <div class="d-grid gap-2">

@@ -87,7 +87,7 @@ public class CelularController {
         // de error
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("errorValidacion",
-                    "Error: No se pudo guardar. Verifica que el precio y stock sean mayores a cero y los campos no estén vacíos.");
+                    "Error: No se pudo guardar. Verifica que el precio y stock sean mayores a cero.");
             return "redirect:/proveedor/dashboard";
         }
 

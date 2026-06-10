@@ -36,6 +36,30 @@ public class Celular {
     @Column(name = "imagen_url", length = 1000)
     private String imagenUrl;
 
+    @NotBlank(message = "La pantalla es obligatoria")
+    @Column(length = 100)
+    private String pantalla;
+
+    @NotBlank(message = "La memoria RAM es obligatoria")
+    @Column(length = 50)
+    private String ram;
+
+    @NotBlank(message = "El almacenamiento es obligatorio")
+    @Column(length = 50)
+    private String almacenamiento;
+
+    @NotBlank(message = "El procesador es obligatorio")
+    @Column(length = 100)
+    private String procesador;
+
+    @NotBlank(message = "La cámara es obligatoria")
+    @Column(length = 100)
+    private String camaraPrincipal;
+
+    @NotBlank(message = "La batería es obligatoria")
+    @Column(length = 50)
+    private String bateria;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "proveedor_id", nullable = false)
     private Usuario proveedor;
@@ -108,6 +132,54 @@ public class Celular {
 
     public void setImagenUrl(String imagenUrl) {
         this.imagenUrl = imagenUrl;
+    }
+
+    public String getPantalla() {
+        return pantalla;
+    }
+
+    public void setPantalla(String pantalla) {
+        this.pantalla = pantalla;
+    }
+
+    public String getRam() {
+        return ram;
+    }
+
+    public void setRam(String ram) {
+        this.ram = ram;
+    }
+
+    public String getAlmacenamiento() {
+        return almacenamiento;
+    }
+
+    public void setAlmacenamiento(String almacenamiento) {
+        this.almacenamiento = almacenamiento;
+    }
+
+    public String getProcesador() {
+        return procesador;
+    }
+
+    public void setProcesador(String procesador) {
+        this.procesador = procesador;
+    }
+
+    public String getCamaraPrincipal() {
+        return camaraPrincipal;
+    }
+
+    public void setCamaraPrincipal(String camaraPrincipal) {
+        this.camaraPrincipal = camaraPrincipal;
+    }
+
+    public String getBateria() {
+        return bateria;
+    }
+
+    public void setBateria(String bateria) {
+        this.bateria = bateria;
     }
 
 }
