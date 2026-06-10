@@ -10,7 +10,8 @@ import jakarta.servlet.http.HttpSession;
 import pe.edu.utp.model.Celular;
 import pe.edu.utp.model.ItemCarrito;
 import pe.edu.utp.service.CelularService;
-
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,6 +84,44 @@ public class CarritoController {
         carrito.removeIf(item -> item.getCelular().getId().equals(id));
         session.setAttribute("miCarrito", carrito);
         return "redirect:/carrito";
+    }
+
+    // 4. Procesar el Pago y actualizar el Stock
+    @PostMapping("/pagar")
+    public String procesarPago(HttpSession session, RedirectAttributes redirectAttributes) {
+
+        List<ItemCarrito> carrito = obtenerCarritoDeSesion(session);
+
+        if (carrito.isEmpty()) {
+            return "redirect:/carrito";
+        }
+
+        // Recorremos todo lo que hay en el carrito
+        for (ItemCarrito item : carrito) {
+            // Buscamos el celular actual directo en la Base de Datos
+            Celular celularBD = celularService.buscarPorId(item.getCelular().getId()).orElse(null);
+
+            if (celularBD != null) {
+                // Restamos la cantidad que el usuario está comprando
+                int nuevoStock = celularBD.getStock() - item.getCantidad();
+
+                // Evitamos que el stock quede en números negativos por seguridad
+                if (nuevoStock < 0) {
+                    nuevoStock = 0;
+                }
+
+                // Guardamos el nuevo stock
+                celularBD.setStock(nuevoStock);
+                celularService.guardar(celularBD);
+            }
+        }
+
+        // Vaciamos el carrito de la memoria temporal
+        session.removeAttribute("miCarrito");
+
+        // Enviamos un mensaje de éxito al catálogo
+        redirectAttributes.addFlashAttribute("exitoCompra", "¡Pago realizado con éxito! Tu orden ha sido procesada.");
+        return "redirect:/catalogo";
     }
 
     @SuppressWarnings("unchecked")
