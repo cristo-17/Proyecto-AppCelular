@@ -22,8 +22,7 @@ public class CarritoController {
     @Autowired
     private CelularService celularService;
 
-    // Aquí está el GetMapping que carga la página principal del carrito
-    // 1. Ver el carrito
+    // Ver el carrito de compras
     @GetMapping
     public String verCarrito(HttpSession session, Model model) {
         // Validar que sea un comprador logueado
@@ -33,15 +32,14 @@ public class CarritoController {
 
         // Obtener el carrito de la sesión
         List<ItemCarrito> carrito = obtenerCarritoDeSesion(session);
-
         double total = 0;
         for (ItemCarrito item : carrito) {
-            // --- ¡LA CURA AL ERROR 500! ---
-            // Refrescamos el celular desde la base de datos para reconectar sus relaciones
-            // (como el proveedor)
+            // Busca la infomación más reciente del celular en la base de datos
             Celular celularFresco = celularService.buscarPorId(item.getCelular().getId()).orElse(null);
+            // Si el celular existe, actualizamos su información en el carrito y calculamos
+            // el subtotal
             if (celularFresco != null) {
-                item.setCelular(celularFresco); // Reemplazamos el viejo por el reconectado
+                item.setCelular(celularFresco);
                 total += item.getSubtotal();
             }
         }
@@ -51,6 +49,7 @@ public class CarritoController {
         return "carrito";
     }
 
+    // Agregar un celular al carrito
     @GetMapping("/agregar/{id}")
     public String agregarAlCarrito(@PathVariable Long id, HttpSession session) {
         if (session.getAttribute("usuarioId") == null || !"COMPRADOR".equals(session.getAttribute("usuarioRol"))) {
@@ -62,6 +61,7 @@ public class CarritoController {
             List<ItemCarrito> carrito = obtenerCarritoDeSesion(session);
 
             boolean existe = false;
+            // Verificar si el celular ya está en el carrito para sumar la cantidad
             for (ItemCarrito item : carrito) {
                 if (item.getCelular().getId().equals(celular.getId())) {
                     item.setCantidad(item.getCantidad() + 1);
@@ -69,6 +69,7 @@ public class CarritoController {
                     break;
                 }
             }
+            // Si no existe, lo agregamos como un nuevo item al carrito
             if (!existe) {
                 carrito.add(new ItemCarrito(celular, 1));
             }
@@ -78,6 +79,7 @@ public class CarritoController {
         return "redirect:/carrito";
     }
 
+    // Eliminar un celular del carrito
     @GetMapping("/eliminar/{id}")
     public String eliminarDelCarrito(@PathVariable Long id, HttpSession session) {
         List<ItemCarrito> carrito = obtenerCarritoDeSesion(session);
@@ -86,7 +88,7 @@ public class CarritoController {
         return "redirect:/carrito";
     }
 
-    // 4. Procesar el Pago y actualizar el Stock
+    // Procesar el pago y actualizar el stock de los celulares comprados
     @PostMapping("/pagar")
     public String procesarPago(HttpSession session, RedirectAttributes redirectAttributes) {
 
@@ -96,34 +98,29 @@ public class CarritoController {
             return "redirect:/carrito";
         }
 
-        // Recorremos todo lo que hay en el carrito
         for (ItemCarrito item : carrito) {
-            // Buscamos el celular actual directo en la Base de Datos
             Celular celularBD = celularService.buscarPorId(item.getCelular().getId()).orElse(null);
 
             if (celularBD != null) {
-                // Restamos la cantidad que el usuario está comprando
+                // Calculamos el nuevo stock restando la cantidad comprada al stock actual
                 int nuevoStock = celularBD.getStock() - item.getCantidad();
-
                 // Evitamos que el stock quede en números negativos por seguridad
                 if (nuevoStock < 0) {
                     nuevoStock = 0;
                 }
-
-                // Guardamos el nuevo stock
                 celularBD.setStock(nuevoStock);
                 celularService.guardar(celularBD);
             }
         }
 
-        // Vaciamos el carrito de la memoria temporal
         session.removeAttribute("miCarrito");
 
-        // Enviamos un mensaje de éxito al catálogo
         redirectAttributes.addFlashAttribute("exitoCompra", "¡Pago realizado con éxito! Tu orden ha sido procesada.");
         return "redirect:/catalogo";
     }
 
+    // Método auxiliar para obtener el carrito de la sesión, con manejo de tipo
+    // seguro
     @SuppressWarnings("unchecked")
     private List<ItemCarrito> obtenerCarritoDeSesion(HttpSession session) {
         List<ItemCarrito> carrito = (List<ItemCarrito>) session.getAttribute("miCarrito");

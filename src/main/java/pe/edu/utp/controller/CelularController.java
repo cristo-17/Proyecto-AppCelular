@@ -31,7 +31,6 @@ public class CelularController {
     // Muestra el Catálogo a los compradores
     @GetMapping("/catalogo")
     public String mostrarCatalogo(Model model) {
-        // Trae todos los celulares de todos los proveedores
         List<Celular> celulares = celularService.listarTodos();
         model.addAttribute("celulares", celulares);
         return "catalogo";
@@ -49,7 +48,8 @@ public class CelularController {
         // Trae solo los celulares de este proveedor
         List<pe.edu.utp.model.Celular> misCelulares = celularService.listarPorProveedor(usuarioId);
 
-        // --- NUEVA LÓGICA: Calcular el promedio exacto de estrellas ---
+        // Calculamos el promedio de estrellas para mostrarlo en el dashboard del
+        // proveedor
         double sumaEstrellas = 0;
         int totalResenas = 0;
 
@@ -62,17 +62,16 @@ public class CelularController {
             }
         }
 
-        // Evitamos dividir entre cero si nadie ha comentado aún
+        // Calculamos el promedio, evitando división por cero
         double promedio = (totalResenas > 0) ? (sumaEstrellas / totalResenas) : 0.0;
-        // ---------------------------------------------------------------
 
         model.addAttribute("celulares", misCelulares);
-        model.addAttribute("promedioEstrellas", promedio); // Enviamos el número al HTML
+        model.addAttribute("promedioEstrellas", promedio);
         model.addAttribute("nuevoCelular", new pe.edu.utp.model.Celular());
         return "proveedor_dashboard";
     }
 
-    // Guarda un nuevo celular
+    // Guarda un nuevo celular o actualiza uno existente
     @PostMapping("/proveedor/guardar")
     public String guardarCelular(@Valid @ModelAttribute("nuevoCelular") pe.edu.utp.model.Celular celular,
             org.springframework.validation.BindingResult result,
@@ -94,14 +93,15 @@ public class CelularController {
         // Si todo está correcto, guarda normalmente
         pe.edu.utp.model.Usuario proveedor = usuarioService.buscarPorId(usuarioId).orElse(null);
         if (proveedor != null) {
-            celular.setProveedor(proveedor); // Asocia el celular al proveedor actual
-            celularService.guardar(celular); // Guarda el nuevo celular en la base de datos
+            // Asignamos el proveedor al celular antes de guardarlo
+            celular.setProveedor(proveedor);
+            celularService.guardar(celular);
             redirectAttributes.addFlashAttribute("exito", "¡Celular publicado/actualizado correctamente!");
         }
         return "redirect:/proveedor/dashboard";
     }
 
-    // Elimina un celular de su inventario
+    // Elimina un celular del catálogo
     @GetMapping("/proveedor/eliminar/{id}")
     public String eliminarCelular(@PathVariable Long id) {
         celularService.eliminar(id);

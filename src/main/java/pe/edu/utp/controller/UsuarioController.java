@@ -24,38 +24,38 @@ public class UsuarioController {
     @Autowired
     private pe.edu.utp.service.CelularService celularService;
 
+    // Muestra la página de login
     @GetMapping("/login")
     public String index() {
         return "index";
     }
 
+    // Muestra la página de registro
     @GetMapping("/registro")
     public String mostrarFormularioRegistro(Model model) {
         model.addAttribute("usuario", new Usuario());
         return "registro";
     }
 
+    // Procesa el formulario de registro
     @PostMapping("/registro")
     public String registrarUsuario(@Valid @ModelAttribute("usuario") pe.edu.utp.model.Usuario usuario,
             BindingResult result,
             Model model) {
 
-        // 1. Si Spring Validator detecta errores (campos vacíos, mal correo, etc.)
+        // Verfica que no haya errores de validación
         if (result.hasErrors()) {
-            // Retornamos a la misma vista de registro para mostrar los mensajes en rojo
             return "registro";
         }
 
-        // 2. Opcional pero recomendado: Verificar si el correo ya existe en la BD
+        // Verifica que el correo no esté ya registrado
         if (usuarioService.existeCorreo(usuario.getCorreo())) {
             model.addAttribute("errorGlobal", "Este correo ya está registrado.");
             return "registro";
         }
 
-        // 3. Si todo está perfecto, guardamos el usuario
         usuarioService.guardar(usuario);
 
-        // Redirigimos al login con un parámetro de éxito
         return "redirect:/login?exito=true";
     }
 
@@ -64,21 +64,20 @@ public class UsuarioController {
     public String dashboardAdmin(Model model, jakarta.servlet.http.HttpSession session) {
 
         Long usuarioId = (Long) session.getAttribute("usuarioId");
-        // Si no inicia sesión o no es administrador, lo botamos al login
+
         if (usuarioId == null || !"ADMIN".equals(session.getAttribute("usuarioRol"))) {
             return "redirect:/login";
         }
 
-        // Traem Todo el inventario de la base de datos
         List<pe.edu.utp.model.Celular> inventarioGlobal = celularService.listarTodos();
         model.addAttribute("inventarioGlobal", inventarioGlobal);
 
         return "admin_dashboard";
     }
 
+    // Elimina un usuario (solo para Admin)
     @GetMapping("/admin/eliminar/{id}")
     public String eliminarUsuario(@PathVariable Long id) {
-        // Usa el método eliminar de nuestro Service
         usuarioService.eliminar(id);
         return "redirect:/admin/dashboard";
     }
@@ -90,10 +89,8 @@ public class UsuarioController {
             HttpSession session,
             Model model) {
 
-        // Busca al usuario en la BD por su correo
         Usuario usuario = usuarioService.buscarPorCorreo(correo);
 
-        // Valida si existe y si la contraseña coincide
         if (usuario != null && usuario.getContrasena().equals(contrasena)) {
 
             // Si el login es exitoso, guarda sus datos en la "Sesión"
@@ -101,7 +98,7 @@ public class UsuarioController {
             session.setAttribute("usuarioRol", usuario.getRol());
             session.setAttribute("usuarioNombre", usuario.getNombres());
 
-            // Redirige a la vista correcta según su ROL
+            // Redirige según el rol del usuario
             if ("ADMIN".equalsIgnoreCase(usuario.getRol())) {
                 return "redirect:/admin/dashboard";
             } else if ("PROVEEDOR".equalsIgnoreCase(usuario.getRol())) {
@@ -111,47 +108,45 @@ public class UsuarioController {
             }
 
         } else {
-            // Si el login es fallido recarga el index y mandamos un mensaje de error
+            // Si el login falla, muestra un mensaje de error
             model.addAttribute("error", "Correo o contraseña incorrectos.");
             return "index";
         }
     }
 
-    // Cerrar sesión
+    // Cierra la sesión del usuario
     @GetMapping("/logout")
     public String cerrarSesion(HttpSession session) {
-        session.invalidate(); // Cierra la sesión, borra todos los datos guardados
-        return "redirect:/"; // Redirige al inicio
+        session.invalidate();
+        return "redirect:/";
     }
 
-    // Muestra la vista del Perfil
+    // Muestra el perfil del usuario con sus datos y métodos de pago
     @GetMapping("/perfil")
     public String verPerfil(Model model, jakarta.servlet.http.HttpSession session) {
         Long usuarioId = (Long) session.getAttribute("usuarioId");
         if (usuarioId == null) {
-            return "redirect:/login"; // Si no hay sesión, al login
+            return "redirect:/login";
         }
 
-        // Trae los datos del usuario actual
         Usuario usuario = usuarioService.buscarPorId(usuarioId).orElse(null);
         model.addAttribute("usuario", usuario);
 
-        // Trae sus tarjetas/métodos de pago guardados
         List<pe.edu.utp.model.FormaPago> pagos = formaPagoService.listarPorUsuario(usuarioId);
         model.addAttribute("formasPago", pagos);
-        model.addAttribute("nuevaFormaPago", new pe.edu.utp.model.FormaPago()); // Objeto vacío para el modal
+        model.addAttribute("nuevaFormaPago", new pe.edu.utp.model.FormaPago());
 
         return "perfil";
     }
 
-    // Guarda un nuevo método de pago
+    // Guarda una nueva forma de pago para el usuario
     @PostMapping("/perfil/pago/guardar")
     public String guardarFormaPago(@ModelAttribute pe.edu.utp.model.FormaPago nuevaFormaPago,
             jakarta.servlet.http.HttpSession session) {
         Long usuarioId = (Long) session.getAttribute("usuarioId");
         if (usuarioId != null) {
             Usuario usuario = usuarioService.buscarPorId(usuarioId).orElse(null);
-            nuevaFormaPago.setUsuario(usuario); // Vinculamos la tarjeta a este usuario
+            nuevaFormaPago.setUsuario(usuario);
 
             if (nuevaFormaPago.getFechaExpiracion() == null || nuevaFormaPago.getFechaExpiracion().isEmpty()) {
                 nuevaFormaPago.setFechaExpiracion("N/A");
@@ -159,7 +154,7 @@ public class UsuarioController {
 
             formaPagoService.guardar(nuevaFormaPago);
         }
-        return "redirect:/perfil"; // Recarga la página para mostrar la nueva tarjeta
+        return "redirect:/perfil";
     }
 
     // Elimina un método de pago de la lista
@@ -169,14 +164,14 @@ public class UsuarioController {
         return "redirect:/perfil";
     }
 
-    // Elimina la cuenta completa
+    // Elimina la cuenta del usuario logueado
     @GetMapping("/perfil/eliminarCuenta")
     public String eliminarMiCuenta(jakarta.servlet.http.HttpSession session) {
         Long usuarioId = (Long) session.getAttribute("usuarioId");
         if (usuarioId != null) {
             usuarioService.eliminar(usuarioId);
-            session.invalidate(); // Cierra la sesión
+            session.invalidate();
         }
-        return "redirect:/"; // Lo devuelve al inicio
+        return "redirect:/";
     }
 }

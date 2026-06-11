@@ -13,17 +13,14 @@ public class CelularService {
     @Autowired
     private CelularRepository celularRepository;
 
-    // Para mostrar todos los celulares en la página principal
     public List<Celular> listarTodos() {
         return celularRepository.findAll();
     }
 
-    // Para mostrar solo los celulares de un proveedor específico en su dashboard
     public List<Celular> listarPorProveedor(Long proveedorId) {
         return celularRepository.findByProveedorId(proveedorId);
     }
 
-    // Método para buscar un celular por su ID
     public Optional<Celular> buscarPorId(Long id) {
         return celularRepository.findById(id);
     }

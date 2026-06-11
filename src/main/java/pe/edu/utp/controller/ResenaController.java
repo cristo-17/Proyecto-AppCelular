@@ -23,7 +23,7 @@ public class ResenaController {
     @Autowired
     private CelularService celularService;
 
-    // Guarda un nuevo comentario
+    // Guarda una nueva reseña
     @PostMapping("/resenas/guardar")
     public String guardarResena(@RequestParam String comentario,
             @RequestParam Integer estrellas,
@@ -48,7 +48,7 @@ public class ResenaController {
         return "redirect:/catalogo";
     }
 
-    // Edita un comentario existente
+    // Edita una reseña existente
     @PostMapping("/resenas/editar")
     public String editarResena(@RequestParam Long id,
             @RequestParam String comentario,
@@ -58,7 +58,7 @@ public class ResenaController {
         Long usuarioId = (Long) session.getAttribute("usuarioId");
         Resena resena = resenaService.buscarPorId(id).orElse(null);
 
-        // Solo guarda si el usuario logueado es el mismo que creó la reseña
+        // Solo edita si es el dueño de la reseña
         if (resena != null && usuarioId != null && resena.getComprador().getId().equals(usuarioId)) {
             resena.setComentario(comentario);
             resena.setEstrellas(estrellas);
@@ -67,7 +67,7 @@ public class ResenaController {
         return "redirect:/catalogo";
     }
 
-    // Elimina un comentario
+    // Elimina una reseña
     @GetMapping("/resenas/eliminar/{id}")
     public String eliminarResena(@PathVariable Long id, HttpSession session) {
         Long usuarioId = (Long) session.getAttribute("usuarioId");

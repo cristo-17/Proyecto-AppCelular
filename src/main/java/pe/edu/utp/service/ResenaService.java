@@ -16,17 +16,14 @@ public class ResenaService {
         resenaRepository.save(resena);
     }
 
-    // Para mostrar los comentarios debajo de cada celular
     public List<Resena> listarPorCelular(Long celularId) {
         return resenaRepository.findByCelularId(celularId);
     }
 
-    // Para buscar una reseña antes de editarla
     public java.util.Optional<Resena> buscarPorId(Long id) {
         return resenaRepository.findById(id);
     }
 
-    // Para eliminar una reseña
     public void eliminar(Long id) {
         resenaRepository.deleteById(id);
     }

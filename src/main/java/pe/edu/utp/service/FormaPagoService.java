@@ -17,12 +17,10 @@ public class FormaPagoService {
         formaPagoRepository.save(formaPago);
     }
 
-    // Para mostrar las formas de pago en el perfil del usuario
     public List<FormaPago> listarPorUsuario(Long usuarioId) {
         return formaPagoRepository.findByUsuarioId(usuarioId);
     }
 
-    // Método para eliminar un método de pago
     public void eliminar(Long id) {
         formaPagoRepository.deleteById(id);
     }
