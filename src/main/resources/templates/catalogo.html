@@ -19,9 +19,14 @@
         padding: 1rem;
         background-color: #f8f9fa;
       }
+      /* Se corrigió la colisión de flexbox con Bootstrap */
+      .carousel-banner {
+        height: 300px;
+      }
     </style>
   </head>
   <body class="bg-light">
+    <!-- Navbar -->
     <nav
       class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow-sm"
     >
@@ -88,6 +93,7 @@
     </nav>
 
     <div class="container my-5">
+      <!-- Alerta de Compra Exitosa -->
       <div
         th:if="${exitoCompra}"
         class="alert alert-success alert-dismissible fade show shadow-sm text-center mb-4"
@@ -102,6 +108,97 @@
           aria-label="Close"
         ></button>
       </div>
+
+      <!-- ========================================== -->
+      <!-- 1. CARRUSEL DE PROMOCIONES CORREGIDO -->
+      <!-- ========================================== -->
+      <div
+        id="promocionesCarousel"
+        class="carousel slide mb-5 shadow-sm rounded overflow-hidden"
+        data-bs-ride="carousel"
+      >
+        <div class="carousel-indicators">
+          <button
+            type="button"
+            data-bs-target="#promocionesCarousel"
+            data-bs-slide-to="0"
+            class="active"
+            aria-current="true"
+            aria-label="Slide 1"
+          ></button>
+          <button
+            type="button"
+            data-bs-target="#promocionesCarousel"
+            data-bs-slide-to="1"
+            aria-label="Slide 2"
+          ></button>
+          <button
+            type="button"
+            data-bs-target="#promocionesCarousel"
+            data-bs-slide-to="2"
+            aria-label="Slide 3"
+          ></button>
+        </div>
+        <div class="carousel-inner">
+          <div class="carousel-item active carousel-banner bg-primary">
+            <div class="d-flex align-items-center justify-content-center h-100">
+              <div class="text-center text-white p-4">
+                <h2 class="fw-bold display-5">
+                  <i class="bi bi-lightning-charge"></i> ¡Gran Cierra Puertas!
+                </h2>
+                <p class="fs-5">
+                  Hasta 40% de descuento en la marca Samsung y Apple.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-item carousel-banner bg-success">
+            <div class="d-flex align-items-center justify-content-center h-100">
+              <div class="text-center text-white p-4">
+                <h2 class="fw-bold display-5">
+                  <i class="bi bi-truck"></i> Envíos Gratis
+                </h2>
+                <p class="fs-5">
+                  Por compras mayores a S/ 5000 a nivel nacional.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="carousel-item carousel-banner bg-dark">
+            <div class="d-flex align-items-center justify-content-center h-100">
+              <div class="text-center text-white p-4">
+                <h2 class="fw-bold display-5">
+                  <i class="bi bi-stars text-warning"></i> Nuevos Ingresos
+                </h2>
+                <p class="fs-5">
+                  Descubre lo último en tecnología de gama alta y media.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button
+          class="carousel-control-prev"
+          type="button"
+          data-bs-target="#promocionesCarousel"
+          data-bs-slide="prev"
+        >
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Anterior</span>
+        </button>
+        <button
+          class="carousel-control-next"
+          type="button"
+          data-bs-target="#promocionesCarousel"
+          data-bs-slide="next"
+        >
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Siguiente</span>
+        </button>
+      </div>
+      <!-- ========================================== -->
+
+      <!-- Buscador y Título -->
       <div class="text-center mb-5">
         <h2 class="fw-bold">Catálogo de Celulares</h2>
         <div class="row justify-content-center mt-3">
@@ -120,6 +217,7 @@
         </div>
       </div>
 
+      <!-- Grilla de Productos -->
       <div class="row row-cols-1 row-cols-md-3 g-4">
         <div
           th:if="${#lists.isEmpty(celulares)}"
@@ -169,7 +267,16 @@
                 >
                   <li>
                     <i class="bi bi-memory"></i> <strong>RAM:</strong>
-                    <span th:text="${celular.ram}"></span> |
+                    <span th:text="${celular.ram}"></span>
+
+                    <i
+                      class="bi bi-info-circle text-primary ms-1"
+                      data-bs-toggle="popover"
+                      data-bs-trigger="hover focus"
+                      data-bs-placement="top"
+                      data-bs-content="Determina la fluidez al abrir múltiples aplicaciones."
+                    ></i>
+                    |
                     <strong>Almacenamiento:</strong>
                     <span th:text="${celular.almacenamiento}"></span>
                   </li>
@@ -183,7 +290,16 @@
                   </li>
                   <li>
                     <i class="bi bi-camera"></i> <strong>Cámara:</strong>
-                    <span th:text="${celular.camaraPrincipal}"></span> |
+                    <span th:text="${celular.camaraPrincipal}"></span>
+
+                    <i
+                      class="bi bi-info-circle text-primary ms-1"
+                      data-bs-toggle="popover"
+                      data-bs-trigger="hover focus"
+                      data-bs-placement="top"
+                      data-bs-content="Resolución del lente principal del equipo."
+                    ></i>
+                    |
                     <i class="bi bi-battery-half"></i>
                     <span th:text="${celular.bateria}"></span>
                   </li>
@@ -209,7 +325,6 @@
               >
                 <i class="bi bi-cart-plus"></i> Iniciar sesión para comprar
               </a>
-
               <a
                 th:if="${session.usuarioId != null}"
                 th:href="@{/carrito/agregar/{id}(id=${celular.id})}"
@@ -217,7 +332,6 @@
               >
                 <i class="bi bi-cart-plus"></i> Agregar al carrito
               </a>
-
               <button
                 class="btn btn-outline-secondary"
                 data-bs-toggle="modal"
@@ -228,6 +342,7 @@
             </div>
           </div>
 
+          <!-- Modal Comentarios -->
           <div
             class="modal fade"
             th:id="'modalComentarios-' + ${celular.id}"
@@ -268,11 +383,12 @@
                           class="form-select form-select-sm text-warning fw-bold"
                           required
                         >
-                          <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
-                          <option value="4">⭐⭐⭐⭐ Muy Bueno</option>
-                          <option value="3">⭐⭐⭐ Regular</option>
-                          <option value="2">⭐⭐ Malo</option>
-                          <option value="1">⭐ Pésimo</option>
+                          <!-- Emojis eliminados, reemplazados por texto para el select -->
+                          <option value="5">5 Estrellas - Excelente</option>
+                          <option value="4">4 Estrellas - Muy Bueno</option>
+                          <option value="3">3 Estrellas - Regular</option>
+                          <option value="2">2 Estrellas - Malo</option>
+                          <option value="1">1 Estrella - Pésimo</option>
                         </select>
                       </div>
                       <div class="mb-2">
@@ -309,7 +425,6 @@
                     >
                       Nadie ha comentado aún. ¡Sé el primero!
                     </div>
-
                     <div
                       class="list-group-item px-0"
                       th:each="resena : ${celular.resenas}"
@@ -324,10 +439,13 @@
                           Nombre Usuario
                         </h6>
                         <div>
+                          <!-- Emojis eliminados en la vista, reemplazados por el ícono de Bootstrap -->
                           <small
                             class="text-warning fw-bold"
-                            th:text="${resena.estrellas + ' ⭐'}"
+                            th:text="${resena.estrellas}"
                           ></small>
+                          <i class="bi bi-star-fill text-warning"></i>
+
                           <div
                             class="d-inline-block ms-2"
                             th:if="${session.usuarioId == resena.comprador.id}"
@@ -378,38 +496,39 @@
                               <select
                                 name="estrellas"
                                 class="form-select text-warning fw-bold"
-                                style="max-width: 80px"
+                                style="max-width: 120px"
                                 required
                               >
+                                <!-- Emojis eliminados -->
                                 <option
                                   value="5"
                                   th:selected="${resena.estrellas == 5}"
                                 >
-                                  5 ⭐
+                                  5 Estrellas
                                 </option>
                                 <option
                                   value="4"
                                   th:selected="${resena.estrellas == 4}"
                                 >
-                                  4 ⭐
+                                  4 Estrellas
                                 </option>
                                 <option
                                   value="3"
                                   th:selected="${resena.estrellas == 3}"
                                 >
-                                  3 ⭐
+                                  3 Estrellas
                                 </option>
                                 <option
                                   value="2"
                                   th:selected="${resena.estrellas == 2}"
                                 >
-                                  2 ⭐
+                                  2 Estrellas
                                 </option>
                                 <option
                                   value="1"
                                   th:selected="${resena.estrellas == 1}"
                                 >
-                                  1 ⭐
+                                  1 Estrella
                                 </option>
                               </select>
                               <input
@@ -436,6 +555,105 @@
       </div>
     </div>
 
+    <!-- Acordeón de Preguntas Frecuentes -->
+    <div class="container my-5 pb-5">
+      <h3 class="fw-bold text-center mb-4">
+        <i class="bi bi-question-circle text-primary"></i> Preguntas Frecuentes
+      </h3>
+      <div class="accordion shadow-sm" id="accordionFAQ">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingOne">
+            <button
+              class="accordion-button fw-bold"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseOne"
+              aria-expanded="true"
+              aria-controls="collapseOne"
+            >
+              ¿Los celulares son originales y tienen garantía?
+            </button>
+          </h2>
+          <div
+            id="collapseOne"
+            class="accordion-collapse collapse show"
+            aria-labelledby="headingOne"
+            data-bs-parent="#accordionFAQ"
+          >
+            <div class="accordion-body">
+              <strong>Absolutamente.</strong> Todos los equipos publicados por
+              nuestros proveedores verificados son originales, vienen sellados
+              de fábrica y cuentan con 12 meses de garantía directa.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingTwo">
+            <button
+              class="accordion-button collapsed fw-bold"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseTwo"
+              aria-expanded="false"
+              aria-controls="collapseTwo"
+            >
+              ¿Cuáles son los métodos de pago disponibles?
+            </button>
+          </h2>
+          <div
+            id="collapseTwo"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingTwo"
+            data-bs-parent="#accordionFAQ"
+          >
+            <div class="accordion-body">
+              Aceptamos todas las tarjetas de crédito y débito (Visa,
+              Mastercard, American Express), transferencias bancarias directas y
+              pagos mediante billeteras digitales como Yape y Plin.
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingThree">
+            <button
+              class="accordion-button collapsed fw-bold"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapseThree"
+              aria-expanded="false"
+              aria-controls="collapseThree"
+            >
+              ¿Cuánto tiempo tarda el envío a provincia?
+            </button>
+          </h2>
+          <div
+            id="collapseThree"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingThree"
+            data-bs-parent="#accordionFAQ"
+          >
+            <div class="accordion-body">
+              Realizamos envíos a nivel nacional a través de Olva Courier y
+              Shalom Corporation SAC. El tiempo estimado de llegada es de
+              <strong>24 a 48 horas hábiles</strong> dependiendo del destino.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Inicializador de Popovers -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var popoverTriggerList = [].slice.call(
+          document.querySelectorAll('[data-bs-toggle="popover"]'),
+        );
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+          return new bootstrap.Popover(popoverTriggerEl);
+        });
+      });
+    </script>
   </body>
 </html>

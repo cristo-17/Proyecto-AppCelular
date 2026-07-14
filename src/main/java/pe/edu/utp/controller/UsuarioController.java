@@ -6,7 +6,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import pe.edu.utp.model.Usuario;
 import pe.edu.utp.service.UsuarioService;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
 
@@ -24,11 +23,8 @@ public class UsuarioController {
     @Autowired
     private pe.edu.utp.service.CelularService celularService;
 
-    // Muestra la página de login
-    @GetMapping("/login")
-    public String index() {
-        return "index";
-    }
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     // Muestra la página de registro
     @GetMapping("/registro")
@@ -43,7 +39,7 @@ public class UsuarioController {
             BindingResult result,
             Model model) {
 
-        // Verfica que no haya errores de validación
+        // Verifica que no haya errores de validación
         if (result.hasErrors()) {
             return "registro";
         }
@@ -53,6 +49,9 @@ public class UsuarioController {
             model.addAttribute("errorGlobal", "Este correo ya está registrado.");
             return "registro";
         }
+
+        // ENCRIPTACIÓN AQUÍ: Hasheamos la contraseña antes de mandarla a la BD
+        usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
 
         usuarioService.guardar(usuario);
 
@@ -80,45 +79,6 @@ public class UsuarioController {
     public String eliminarUsuario(@PathVariable Long id) {
         usuarioService.eliminar(id);
         return "redirect:/admin/dashboard";
-    }
-
-    // Procesa el formulario de Login
-    @PostMapping("/login")
-    public String procesarLogin(@RequestParam String correo,
-            @RequestParam String contrasena,
-            HttpSession session,
-            Model model) {
-
-        Usuario usuario = usuarioService.buscarPorCorreo(correo);
-
-        if (usuario != null && usuario.getContrasena().equals(contrasena)) {
-
-            // Si el login es exitoso, guarda sus datos en la "Sesión"
-            session.setAttribute("usuarioId", usuario.getId());
-            session.setAttribute("usuarioRol", usuario.getRol());
-            session.setAttribute("usuarioNombre", usuario.getNombres());
-
-            // Redirige según el rol del usuario
-            if ("ADMIN".equalsIgnoreCase(usuario.getRol())) {
-                return "redirect:/admin/dashboard";
-            } else if ("PROVEEDOR".equalsIgnoreCase(usuario.getRol())) {
-                return "redirect:/proveedor/dashboard";
-            } else {
-                return "redirect:/catalogo";
-            }
-
-        } else {
-            // Si el login falla, muestra un mensaje de error
-            model.addAttribute("error", "Correo o contraseña incorrectos.");
-            return "index";
-        }
-    }
-
-    // Cierra la sesión del usuario
-    @GetMapping("/logout")
-    public String cerrarSesion(HttpSession session) {
-        session.invalidate();
-        return "redirect:/";
     }
 
     // Muestra el perfil del usuario con sus datos y métodos de pago

@@ -39,7 +39,7 @@
             <h4 class="card-title fw-bold mt-2">Iniciar Sesión</h4>
           </div>
 
-          <!-- Mensaje de Error Dinámico -->
+          <!-- Mensaje de Error Dinámico (Texto de 3 intentos o bloqueo) -->
           <div
             th:if="${error}"
             class="alert alert-danger text-center shadow-sm py-2"
@@ -52,38 +52,27 @@
           <!-- Formulario de Inicio de Sesión -->
           <form th:action="@{/login}" method="post">
             <div class="mb-3">
-              <label for="email" class="form-label">Correo Electrónico</label>
-              <div class="input-group">
-                <span class="input-group-text bg-white"
-                  ><i class="bi bi-envelope text-muted"></i
-                ></span>
-
-                <input
-                  type="email"
-                  class="form-control border-start-0"
-                  id="email"
-                  name="correo"
-                  placeholder="tu@correo.com"
-                  required
-                />
-              </div>
+              <label class="form-label fw-bold">Correo Electrónico</label>
+              <input
+                type="text"
+                class="form-control"
+                name="correo"
+                th:classappend="${error != null} ? 'is-invalid' : ''"
+                placeholder="juan@correo.com"
+                required
+              />
             </div>
-            <div class="mb-4">
-              <label for="password" class="form-label">Contraseña</label>
-              <div class="input-group">
-                <span class="input-group-text bg-white"
-                  ><i class="bi bi-lock text-muted"></i
-                ></span>
 
-                <input
-                  type="password"
-                  class="form-control border-start-0"
-                  id="password"
-                  name="contrasena"
-                  placeholder="********"
-                  required
-                />
-              </div>
+            <div class="mb-4">
+              <label class="form-label fw-bold">Contraseña</label>
+              <input
+                type="password"
+                class="form-control"
+                name="contrasena"
+                th:classappend="${error != null} ? 'is-invalid' : ''"
+                placeholder="Mínimo 6 caracteres"
+                required
+              />
             </div>
 
             <div class="d-grid gap-2">
