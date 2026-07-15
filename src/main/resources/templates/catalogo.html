@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AppCelulares - Catálogo</title>
+    <!-- Ícono de la pestaña (Favicon) generado con Bootstrap Icons -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d6efd' d='M3 2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm6 11a1 1 0 1 0-2 0 1 1 0 0 0 2 0'/></svg>"
+      type="image/svg+xml"
+    />
+
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -16,11 +23,25 @@
       .product-img {
         height: 250px;
         object-fit: contain;
-        padding: 1rem;
-        background-color: #f8f9fa;
+        padding: 1.5rem;
+        background-color: transparent;
       }
-      .carousel-banner {
-        height: 300px;
+      .card-hover {
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
+      }
+      .drop-shadow {
+        filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.2));
+      }
+      .carousel-control-prev-icon,
+      .carousel-control-next-icon {
+        width: 3rem;
+        height: 3rem;
       }
     </style>
   </head>
@@ -95,7 +116,7 @@
       <!-- Alerta de Compra Exitosa -->
       <div
         th:if="${exitoCompra}"
-        class="alert alert-success alert-dismissible fade show shadow-sm text-center mb-4"
+        class="alert alert-success alert-dismissible fade show shadow-sm text-center mb-4 rounded-4"
         role="alert"
       >
         <i class="bi bi-check-circle-fill fs-5 me-2"></i>
@@ -108,113 +129,141 @@
         ></button>
       </div>
 
-      <!-- CARRUSEL DE PROMOCIONES -->
+      <!-- ========================================== -->
+      <!-- CARRUSEL DINÁMICO DE EQUIPOS DESTACADOS    -->
+      <!-- ========================================== -->
       <div
-        id="promocionesCarousel"
-        class="carousel slide mb-5 shadow-sm rounded overflow-hidden"
+        th:if="${not #lists.isEmpty(celulares)}"
+        id="carruselProductos"
+        class="carousel slide mb-5 shadow-sm rounded-4 overflow-hidden"
         data-bs-ride="carousel"
+        style="
+          background: linear-gradient(135deg, #ffffff, #f0f4f8);
+          border: 1px solid #e9ecef;
+        "
       >
-        <div class="carousel-indicators">
-          <button
-            type="button"
-            data-bs-target="#promocionesCarousel"
-            data-bs-slide-to="0"
-            class="active"
-            aria-current="true"
-            aria-label="Slide 1"
-          ></button>
-          <button
-            type="button"
-            data-bs-target="#promocionesCarousel"
-            data-bs-slide-to="1"
-            aria-label="Slide 2"
-          ></button>
-          <button
-            type="button"
-            data-bs-target="#promocionesCarousel"
-            data-bs-slide-to="2"
-            aria-label="Slide 3"
-          ></button>
-        </div>
         <div class="carousel-inner">
-          <div class="carousel-item active carousel-banner bg-primary">
-            <div class="d-flex align-items-center justify-content-center h-100">
-              <div class="text-center text-white p-4">
-                <h2 class="fw-bold display-5">
-                  <i class="bi bi-lightning-charge"></i> ¡Gran Cierra Puertas!
-                </h2>
-                <p class="fs-5">
-                  Hasta 40% de descuento en la marca Samsung y Apple.
-                </p>
+          <!-- Iteramos los celulares y solo mostramos los 3 primeros -->
+          <div
+            th:each="celular, stat : ${celulares}"
+            th:if="${stat.index < 3}"
+            th:classappend="${stat.first} ? 'active' : ''"
+            class="carousel-item"
+          >
+            <div class="row g-0 align-items-center" style="min-height: 380px">
+              <div class="col-md-5 text-center p-4">
+                <img
+                  th:if="${celular.imagenUrl != null and celular.imagenUrl != ''}"
+                  th:src="${celular.imagenUrl}"
+                  class="img-fluid drop-shadow"
+                  style="max-height: 280px; object-fit: contain"
+                  alt="Celular Destacado"
+                />
+                <img
+                  th:unless="${celular.imagenUrl != null and celular.imagenUrl != ''}"
+                  th:src="@{'https://via.placeholder.com/300x400?text=' + ${celular.marca}}"
+                  class="img-fluid drop-shadow"
+                  style="max-height: 280px"
+                  alt="Sin foto"
+                />
               </div>
-            </div>
-          </div>
-          <div class="carousel-item carousel-banner bg-success">
-            <div class="d-flex align-items-center justify-content-center h-100">
-              <div class="text-center text-white p-4">
-                <h2 class="fw-bold display-5">
-                  <i class="bi bi-truck"></i> Envíos Gratis
+              <div class="col-md-7 p-4 p-md-5">
+                <span
+                  class="badge bg-danger mb-3 px-3 py-2 rounded-pill shadow-sm"
+                  ><i class="bi bi-fire"></i> ¡Equipos más populares!</span
+                >
+                <h2
+                  class="fw-bold display-6 text-dark mb-2"
+                  th:text="${celular.marca + ' ' + celular.modelo}"
+                >
+                  Marca Modelo
                 </h2>
-                <p class="fs-5">
-                  Por compras mayores a S/ 5000 a nivel nacional.
+                <h3
+                  class="text-success fw-bold mb-3"
+                  th:text="'S/ ' + ${#numbers.formatDecimal(celular.precio, 1, 'COMMA', 2, 'POINT')}"
+                >
+                  S/ 0.00
+                </h3>
+                <p class="text-muted fs-6 mb-4">
+                  <i class="bi bi-cpu text-primary"></i>
+                  <span th:text="${celular.procesador}"></span> |
+                  <i class="bi bi-memory text-primary"></i>
+                  <span th:text="${celular.ram}"></span> RAM
                 </p>
-              </div>
-            </div>
-          </div>
-          <div class="carousel-item carousel-banner bg-dark">
-            <div class="d-flex align-items-center justify-content-center h-100">
-              <div class="text-center text-white p-4">
-                <h2 class="fw-bold display-5">
-                  <i class="bi bi-stars text-warning"></i> Nuevos Ingresos
-                </h2>
-                <p class="fs-5">
-                  Descubre lo último en tecnología de gama alta y media.
-                </p>
+                <div class="d-flex gap-2">
+                  <a
+                    th:if="${session.usuarioId != null}"
+                    th:href="@{/carrito/agregar/{id}(id=${celular.id})}"
+                    class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-4"
+                    ><i class="bi bi-cart-plus"></i> Añadir al Carrito</a
+                  >
+                  <a
+                    th:if="${session.usuarioId == null}"
+                    th:href="@{/login}"
+                    class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-4"
+                    ><i class="bi bi-cart-plus"></i> Iniciar Sesión para
+                    comprar</a
+                  >
+                </div>
               </div>
             </div>
           </div>
         </div>
+
         <button
           class="carousel-control-prev"
           type="button"
-          data-bs-target="#promocionesCarousel"
+          data-bs-target="#carruselProductos"
           data-bs-slide="prev"
         >
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span
+            class="carousel-control-prev-icon bg-dark rounded-circle p-2 opacity-50"
+            aria-hidden="true"
+          ></span>
           <span class="visually-hidden">Anterior</span>
         </button>
         <button
           class="carousel-control-next"
           type="button"
-          data-bs-target="#promocionesCarousel"
+          data-bs-target="#carruselProductos"
           data-bs-slide="next"
         >
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span
+            class="carousel-control-next-icon bg-dark rounded-circle p-2 opacity-50"
+            aria-hidden="true"
+          ></span>
           <span class="visually-hidden">Siguiente</span>
         </button>
       </div>
 
-      <!-- Buscador y Título -->
-      <div class="text-center mb-5">
-        <h2 class="fw-bold">Catálogo de Celulares</h2>
-        <div class="row justify-content-center mt-3">
-          <div class="col-md-6">
-            <div class="input-group input-group-lg shadow-sm">
-              <span class="input-group-text bg-white"
-                ><i class="bi bi-search"></i
+      <!-- Buscador y Título Integrado -->
+      <div id="catalogo-grid" class="text-center mb-5 pt-2">
+        <h2 class="fw-bold text-dark mb-4">Nuestro Catálogo Completo</h2>
+        <div class="row justify-content-center">
+          <div class="col-md-7">
+            <!-- Nuevo buscador con diseño moderno de píldora -->
+            <div
+              class="input-group input-group-lg shadow-sm rounded-pill overflow-hidden bg-white border"
+            >
+              <span class="input-group-text bg-transparent border-0 ps-4"
+                ><i class="bi bi-search text-primary"></i
               ></span>
               <input
                 type="text"
-                class="form-control border-start-0"
-                placeholder="Buscar marca o modelo..."
+                id="buscadorCatalogo"
+                class="form-control border-0 px-3 shadow-none"
+                placeholder="Buscar por marca o modelo (Ej. Apple, Samsung, S24)..."
               />
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Grilla de Productos -->
-      <div class="row row-cols-1 row-cols-md-3 g-4">
+      <!-- Grilla de Productos (Modernizada) -->
+      <div
+        class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4"
+        id="contenedorTarjetas"
+      >
         <div
           th:if="${#lists.isEmpty(celulares)}"
           class="col-12 text-center text-muted mt-5"
@@ -223,8 +272,11 @@
           <h4>No se encontraron celulares.</h4>
         </div>
 
-        <div class="col" th:each="celular : ${celulares}">
-          <div class="card h-100 shadow-sm border-0">
+        <div class="col tarjeta-filtro" th:each="celular : ${celulares}">
+          <!-- Tarjeta redondeada y con hover -->
+          <div
+            class="card h-100 shadow-sm border-0 rounded-4 card-hover overflow-hidden bg-white"
+          >
             <img
               th:if="${celular.imagenUrl != null and celular.imagenUrl != ''}"
               th:src="${celular.imagenUrl}"
@@ -238,103 +290,102 @@
               alt="Celular sin foto"
             />
 
-            <div class="card-body">
+            <div
+              class="card-body bg-light border-top border-light m-2 rounded-4"
+            >
               <h5
-                class="card-title fw-bold"
+                class="card-title fw-bold marca-modelo-texto text-dark"
                 th:text="${celular.marca + ' ' + celular.modelo}"
               >
                 Marca Modelo
               </h5>
               <h4
-                class="text-success fw-bold"
+                class="text-success fw-bold mb-3"
                 th:text="'S/ ' + ${#numbers.formatDecimal(celular.precio, 1, 'COMMA', 2, 'POINT')}"
               >
                 S/ 0.00
               </h4>
+
               <span
-                class="badge bg-primary mb-2"
+                class="badge bg-primary rounded-pill px-3 mb-3 shadow-sm"
                 th:text="'Stock: ' + ${celular.stock} + ' unidades'"
                 >Stock: 0</span
               >
 
               <div class="card-text text-muted small mb-3">
                 <ul
-                  class="list-unstyled small text-muted mb-2 bg-light p-2 rounded"
+                  class="list-unstyled small text-muted mb-2 bg-white p-3 rounded-4 shadow-sm border"
                 >
-                  <li>
-                    <i class="bi bi-memory"></i> <strong>RAM:</strong>
-                    <span th:text="${celular.ram}"></span>
-                    <i
-                      class="bi bi-info-circle text-primary ms-1"
-                      data-bs-toggle="popover"
-                      data-bs-trigger="hover focus"
-                      data-bs-placement="top"
-                      data-bs-content="Determina la fluidez al abrir múltiples aplicaciones."
-                    ></i>
-                    | <strong>Almacenamiento:</strong>
+                  <li class="mb-1">
+                    <i class="bi bi-memory text-primary"></i>
+                    <strong>RAM:</strong>
+                    <span th:text="${celular.ram}"></span> |
+                    <strong>ROM:</strong>
                     <span th:text="${celular.almacenamiento}"></span>
                   </li>
-                  <li>
-                    <i class="bi bi-cpu"></i> <strong>CPU:</strong>
+                  <li class="mb-1">
+                    <i class="bi bi-cpu text-primary"></i> <strong>CPU:</strong>
                     <span th:text="${celular.procesador}"></span>
                   </li>
-                  <li>
-                    <i class="bi bi-phone"></i> <strong>Pantalla:</strong>
+                  <li class="mb-1">
+                    <i class="bi bi-phone text-primary"></i>
+                    <strong>Pantalla:</strong>
                     <span th:text="${celular.pantalla}"></span>
                   </li>
                   <li>
-                    <i class="bi bi-camera"></i> <strong>Cámara:</strong>
+                    <i class="bi bi-camera text-primary"></i>
+                    <strong>Cámara:</strong>
                     <span th:text="${celular.camaraPrincipal}"></span>
-                    <i
-                      class="bi bi-info-circle text-primary ms-1"
-                      data-bs-toggle="popover"
-                      data-bs-trigger="hover focus"
-                      data-bs-placement="top"
-                      data-bs-content="Resolución del lente principal del equipo."
-                    ></i>
-                    | <i class="bi bi-battery-half"></i>
-                    <span th:text="${celular.bateria}"></span>
                   </li>
                 </ul>
-                <i class="bi bi-shop"></i> Vendido por:
-                <span th:text="${celular.proveedor.nombres}">Proveedor</span>
+                <div class="mt-2 text-center">
+                  <i class="bi bi-shop text-secondary"></i> Vendido por:
+                  <span
+                    class="fw-bold text-dark"
+                    th:text="${celular.proveedor.nombres}"
+                    >Proveedor</span
+                  >
+                </div>
               </div>
 
-              <div class="text-warning small mb-2">
+              <div class="text-warning small mb-2 fw-bold text-center">
                 <i class="bi bi-star-fill"></i> Promedio de usuarios
                 <span
-                  class="text-dark ms-1"
+                  class="text-muted ms-1 fw-normal"
                   th:text="'(' + ${#lists.size(celular.resenas)} + ' opiniones)'"
                 ></span>
               </div>
             </div>
 
-            <div class="card-footer bg-white border-top-0 d-grid gap-2">
+            <!-- Footer de tarjeta modernizado -->
+            <div
+              class="card-footer bg-white border-top-0 d-grid gap-2 p-3 pt-0"
+            >
               <a
                 th:if="${session.usuarioId == null}"
                 th:href="@{/login}"
-                class="btn btn-primary fw-bold"
+                class="btn btn-primary fw-bold rounded-pill shadow-sm"
               >
-                <i class="bi bi-cart-plus"></i> Iniciar sesión para comprar
+                <i class="bi bi-cart-plus"></i> Iniciar sesión
               </a>
               <a
                 th:if="${session.usuarioId != null}"
                 th:href="@{/carrito/agregar/{id}(id=${celular.id})}"
-                class="btn btn-primary fw-bold"
+                class="btn btn-primary fw-bold rounded-pill shadow-sm"
               >
-                <i class="bi bi-cart-plus"></i> Agregar al carrito
+                <i class="bi bi-cart-plus"></i> Al carrito
               </a>
               <button
-                class="btn btn-outline-secondary"
+                class="btn btn-outline-secondary rounded-pill"
                 data-bs-toggle="modal"
                 th:data-bs-target="'#modalComentarios-' + ${celular.id}"
               >
-                <i class="bi bi-chat-text"></i> Ver / Dejar Comentario
+                <i class="bi bi-chat-text"></i> Ver Opiniones
               </button>
             </div>
           </div>
 
-          <!-- Modal Comentarios -->
+          <!-- Modal Comentarios (Sin cambios lógicos) -->
           <div
             class="modal fade"
             th:id="'modalComentarios-' + ${celular.id}"
@@ -342,8 +393,8 @@
             aria-hidden="true"
           >
             <div class="modal-dialog modal-dialog-scrollable">
-              <div class="modal-content">
-                <div class="modal-header">
+              <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header bg-light border-0">
                   <h5 class="modal-title fw-bold">
                     Opiniones: <span th:text="${celular.modelo}"></span>
                   </h5>
@@ -357,9 +408,9 @@
                 <div class="modal-body">
                   <div
                     th:if="${session.usuarioRol == 'COMPRADOR'}"
-                    class="card bg-light border-0 mb-4 p-3"
+                    class="card bg-white shadow-sm border-0 mb-4 p-3 rounded-4"
                   >
-                    <h6 class="fw-bold mb-3">
+                    <h6 class="fw-bold mb-3 text-primary">
                       <i class="bi bi-pencil"></i> Deja tu opinión
                     </h6>
                     <form th:action="@{/resenas/guardar}" method="post">
@@ -369,10 +420,12 @@
                         th:value="${celular.id}"
                       />
                       <div class="mb-2">
-                        <label class="form-label small">Calificación</label>
+                        <label class="form-label small fw-bold"
+                          >Calificación</label
+                        >
                         <select
                           name="estrellas"
-                          class="form-select form-select-sm text-warning fw-bold"
+                          class="form-select form-select-sm text-warning fw-bold rounded-3"
                           required
                         >
                           <option value="5">5 Estrellas - Excelente</option>
@@ -382,10 +435,10 @@
                           <option value="1">1 Estrella - Pésimo</option>
                         </select>
                       </div>
-                      <div class="mb-2">
+                      <div class="mb-3">
                         <textarea
                           name="comentario"
-                          class="form-control form-control-sm"
+                          class="form-control form-control-sm rounded-3"
                           rows="2"
                           placeholder="Escribe tu experiencia..."
                           required
@@ -393,7 +446,7 @@
                       </div>
                       <button
                         type="submit"
-                        class="btn btn-sm btn-success w-100 fw-bold"
+                        class="btn btn-sm btn-success w-100 fw-bold rounded-pill shadow-sm"
                       >
                         Publicar Comentario
                       </button>
@@ -402,7 +455,7 @@
 
                   <div
                     th:if="${session.usuarioId == null}"
-                    class="alert alert-warning text-center small py-2"
+                    class="alert alert-warning text-center small py-2 rounded-4 shadow-sm"
                   >
                     Debes
                     <a th:href="@{/login}" class="alert-link">iniciar sesión</a>
@@ -417,14 +470,14 @@
                       Nadie ha comentado aún. ¡Sé el primero!
                     </div>
                     <div
-                      class="list-group-item px-0"
+                      class="list-group-item px-0 border-light"
                       th:each="resena : ${celular.resenas}"
                     >
                       <div
                         class="d-flex justify-content-between align-items-center"
                       >
                         <h6
-                          class="mb-1 fw-bold"
+                          class="mb-1 fw-bold text-dark"
                           th:text="${resena.comprador.nombres}"
                         >
                           Nombre Usuario
@@ -440,7 +493,7 @@
                             th:if="${session.usuarioId == resena.comprador.id}"
                           >
                             <button
-                              class="btn btn-sm btn-link text-primary p-0"
+                              class="btn btn-sm btn-light text-primary rounded-circle p-1"
                               title="Editar"
                               data-bs-toggle="collapse"
                               th:data-bs-target="'#editResena-' + ${resena.id}"
@@ -449,7 +502,7 @@
                             </button>
                             <a
                               th:href="@{/resenas/eliminar/{id}(id=${resena.id})}"
-                              class="btn btn-sm btn-link text-danger p-0 ms-1"
+                              class="btn btn-sm btn-light text-danger rounded-circle p-1 ms-1"
                               title="Eliminar"
                               onclick="
                                 return confirm(
@@ -463,7 +516,7 @@
                         </div>
                       </div>
                       <p
-                        class="mb-1 text-muted small"
+                        class="mb-1 text-muted small mt-1"
                         th:text="${resena.comentario}"
                       >
                         Texto del comentario...
@@ -474,7 +527,9 @@
                         class="collapse mt-2"
                         th:id="'editResena-' + ${resena.id}"
                       >
-                        <div class="card card-body bg-light p-2 border-0">
+                        <div
+                          class="card card-body bg-light p-2 border-0 rounded-4 shadow-sm"
+                        >
                           <form th:action="@{/resenas/editar}" method="post">
                             <input
                               type="hidden"
@@ -526,7 +581,10 @@
                                 th:value="${resena.comentario}"
                                 required
                               />
-                              <button type="submit" class="btn btn-success">
+                              <button
+                                type="submit"
+                                class="btn btn-success fw-bold"
+                              >
                                 <i class="bi bi-check2"></i> Guardar
                               </button>
                             </div>
@@ -548,16 +606,18 @@
       <h3 class="fw-bold text-center mb-4">
         <i class="bi bi-question-circle text-primary"></i> Preguntas Frecuentes
       </h3>
-      <div class="accordion shadow-sm" id="accordionFAQ">
-        <div class="accordion-item">
+      <div
+        class="accordion shadow-sm rounded-4 overflow-hidden"
+        id="accordionFAQ"
+      >
+        <div class="accordion-item border-0 border-bottom">
           <h2 class="accordion-header" id="headingOne">
             <button
-              class="accordion-button fw-bold"
+              class="accordion-button fw-bold bg-white text-dark"
               type="button"
               data-bs-toggle="collapse"
               data-bs-target="#collapseOne"
               aria-expanded="true"
-              aria-controls="collapseOne"
             >
               ¿Los celulares son originales y tienen garantía?
             </button>
@@ -565,25 +625,23 @@
           <div
             id="collapseOne"
             class="accordion-collapse collapse show"
-            aria-labelledby="headingOne"
             data-bs-parent="#accordionFAQ"
           >
-            <div class="accordion-body">
+            <div class="accordion-body text-muted">
               <strong>Absolutamente.</strong> Todos los equipos publicados por
               nuestros proveedores verificados son originales, vienen sellados
               de fábrica y cuentan con 12 meses de garantía directa.
             </div>
           </div>
         </div>
-        <div class="accordion-item">
+        <div class="accordion-item border-0 border-bottom">
           <h2 class="accordion-header" id="headingTwo">
             <button
-              class="accordion-button collapsed fw-bold"
+              class="accordion-button collapsed fw-bold bg-white text-dark"
               type="button"
               data-bs-toggle="collapse"
               data-bs-target="#collapseTwo"
               aria-expanded="false"
-              aria-controls="collapseTwo"
             >
               ¿Cuáles son los métodos de pago disponibles?
             </button>
@@ -591,25 +649,23 @@
           <div
             id="collapseTwo"
             class="accordion-collapse collapse"
-            aria-labelledby="headingTwo"
             data-bs-parent="#accordionFAQ"
           >
-            <div class="accordion-body">
+            <div class="accordion-body text-muted">
               Aceptamos todas las tarjetas de crédito y débito (Visa,
               Mastercard, American Express), transferencias bancarias directas y
               pagos mediante billeteras digitales como Yape y Plin.
             </div>
           </div>
         </div>
-        <div class="accordion-item">
+        <div class="accordion-item border-0">
           <h2 class="accordion-header" id="headingThree">
             <button
-              class="accordion-button collapsed fw-bold"
+              class="accordion-button collapsed fw-bold bg-white text-dark"
               type="button"
               data-bs-toggle="collapse"
               data-bs-target="#collapseThree"
               aria-expanded="false"
-              aria-controls="collapseThree"
             >
               ¿Cuánto tiempo tarda el envío a provincia?
             </button>
@@ -617,12 +673,11 @@
           <div
             id="collapseThree"
             class="accordion-collapse collapse"
-            aria-labelledby="headingThree"
             data-bs-parent="#accordionFAQ"
           >
-            <div class="accordion-body">
+            <div class="accordion-body text-muted">
               Realizamos envíos a nivel nacional a través de Olva Courier y
-              Shalom Corporation SAC. El tiempo estimado de llegada es de
+              Shalom. El tiempo estimado de llegada es de
               <strong>24 a 48 horas hábiles</strong> dependiendo del destino.
             </div>
           </div>
@@ -630,13 +685,10 @@
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- NUEVO FOOTER CORPORATIVO -->
-    <!-- ========================================== -->
+    <!-- FOOTER CORPORATIVO -->
     <footer class="bg-white border-top pt-5 pb-3">
       <div class="container">
         <div class="row">
-          <!-- Columna 1: Branding y Descripción -->
           <div class="col-lg-4 col-md-6 mb-4">
             <h4 class="fw-bold text-dark">
               <i class="bi bi-phone text-primary"></i> AppCelulares
@@ -648,8 +700,6 @@
               todo el país.
             </p>
           </div>
-
-          <!-- Columna 2: Productos (Enlaces funcionales) -->
           <div class="col-lg-2 col-md-6 mb-4">
             <h6 class="fw-bold text-dark text-uppercase mb-3">Productos</h6>
             <ul class="list-unstyled">
@@ -690,7 +740,6 @@
               </li>
             </ul>
           </div>
-          <!-- Columna 4: Legal -->
           <div class="col-lg-2 col-md-6 mb-4">
             <h6 class="fw-bold text-dark text-uppercase mb-3">Legal</h6>
             <ul class="list-unstyled">
@@ -711,8 +760,6 @@
               </li>
             </ul>
           </div>
-
-          <!-- Columna 5: Contacto -->
           <div class="col-lg-2 col-md-6 mb-4">
             <h6 class="fw-bold text-dark text-uppercase mb-3">Contacto</h6>
             <ul class="list-unstyled">
@@ -725,10 +772,7 @@
             </ul>
           </div>
         </div>
-
         <hr class="text-muted mb-4 mt-2" />
-
-        <!-- Copyright -->
         <div class="row align-items-center">
           <div class="col-md-12 text-center text-muted small">
             &copy; 2026 AppCelulares. Todos los derechos reservados.
@@ -738,6 +782,8 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Script de Inicialización de Popovers -->
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         var popoverTriggerList = [].slice.call(
@@ -746,6 +792,31 @@
         var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
           return new bootstrap.Popover(popoverTriggerEl);
         });
+      });
+    </script>
+
+    <!-- SCRIPT DEL BUSCADOR EN TIEMPO REAL -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const buscador = document.getElementById("buscadorCatalogo");
+
+        if (buscador) {
+          buscador.addEventListener("keyup", function () {
+            const textoBuscado = this.value.toLowerCase();
+            const tarjetas = document.querySelectorAll(".tarjeta-filtro");
+
+            tarjetas.forEach(function (tarjeta) {
+              const tituloCelular = tarjeta
+                .querySelector(".marca-modelo-texto")
+                .textContent.toLowerCase();
+              if (tituloCelular.includes(textoBuscado)) {
+                tarjeta.style.display = "";
+              } else {
+                tarjeta.style.display = "none";
+              }
+            });
+          });
+        }
       });
     </script>
   </body>

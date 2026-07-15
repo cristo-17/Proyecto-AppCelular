@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AppCelulares - Políticas de Privacidad</title>
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d6efd' d='M3 2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm6 11a1 1 0 1 0-2 0 1 1 0 0 0 2 0'/></svg>"
+      type="image/svg+xml"
+    />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -13,15 +19,72 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
     />
   </head>
-  <body class="bg-light pt-5">
-    <div class="container" style="max-width: 800px">
-      <a
-        th:href="@{/catalogo}"
-        class="text-decoration-none text-muted mb-4 d-inline-block"
-      >
-        <i class="bi bi-arrow-left"></i> Volver al inicio
-      </a>
+  <body class="bg-light">
+    <!-- Navbar Unificado -->
+    <nav
+      class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow-sm"
+    >
+      <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}"
+          ><i class="bi bi-phone"></i> AppCelulares</a
+        >
+        <div class="d-flex align-items-center">
+          <div th:if="${session.usuarioId == null}">
+            <a
+              th:href="@{/login}"
+              class="btn btn-light btn-sm text-primary fw-bold"
+            >
+              <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+            </a>
+            <a th:href="@{/registro}" class="btn btn-outline-light btn-sm ms-2"
+              >Regístrate</a
+            >
+          </div>
+          <div th:if="${session.usuarioId != null}">
+            <span class="text-white me-3 fw-bold"
+              >Hola, <span th:text="${session.usuarioNombre}"></span
+            ></span>
+            <a
+              th:if="${session.usuarioRol == 'COMPRADOR'}"
+              th:href="@{/perfil}"
+              class="btn btn-outline-light btn-sm"
+            >
+              <i class="bi bi-person"></i> Mi Perfil
+            </a>
+            <a
+              th:if="${session.usuarioRol == 'COMPRADOR'}"
+              th:href="@{/carrito}"
+              class="btn btn-warning btn-sm ms-2"
+            >
+              <i class="bi bi-cart3"></i> Mi Carrito
+            </a>
+            <a
+              th:if="${session.usuarioRol == 'PROVEEDOR'}"
+              th:href="@{/proveedor/dashboard}"
+              class="btn btn-outline-light btn-sm"
+            >
+              <i class="bi bi-shop"></i> Mi Inventario
+            </a>
+            <a
+              th:if="${session.usuarioRol == 'ADMIN'}"
+              th:href="@{/admin/dashboard}"
+              class="btn btn-dark btn-sm"
+            >
+              <i class="bi bi-shield-lock"></i> Panel Admin
+            </a>
+            <a
+              th:href="@{/logout}"
+              class="btn btn-danger btn-sm ms-2"
+              title="Cerrar Sesión"
+            >
+              <i class="bi bi-box-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
 
+    <div class="container my-5" style="max-width: 800px">
       <!-- Cabecera -->
       <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body p-5">
@@ -113,6 +176,14 @@
             para servirte. Puedes escribirnos directamente a
             <strong>info@appcelulares.pe</strong>.
           </p>
+
+          <div class="text-center mt-4 pt-3 border-top">
+            <a
+              th:href="@{/}"
+              class="btn btn-outline-primary fw-bold rounded-pill px-4"
+              ><i class="bi bi-house"></i> Volver al Inicio</a
+            >
+          </div>
         </div>
       </div>
     </div>

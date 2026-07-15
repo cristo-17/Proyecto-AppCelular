@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AppCelulares - Mi Perfil</title>
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='%230d6efd' d='M3 2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm6 11a1 1 0 1 0-2 0 1 1 0 0 0 2 0'/></svg>"
+      type="image/svg+xml"
+    />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -14,21 +20,66 @@
     />
   </head>
   <body class="bg-light">
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
+    <!-- Navbar Unificado -->
+    <nav
+      class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow-sm mb-4"
+    >
       <div class="container">
         <a class="navbar-brand fw-bold" th:href="@{/}"
           ><i class="bi bi-phone"></i> AppCelulares</a
         >
         <div class="d-flex align-items-center">
-          <span class="navbar-text text-white me-3">Mi Perfil</span>
-          <a
-            th:href="@{/logout}"
-            class="btn btn-outline-light btn-sm"
-            title="Cerrar Sesión"
-          >
-            <i class="bi bi-box-arrow-right"></i> Salir
-          </a>
+          <div th:if="${session.usuarioId == null}">
+            <a
+              th:href="@{/login}"
+              class="btn btn-light btn-sm text-primary fw-bold"
+            >
+              <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+            </a>
+            <a th:href="@{/registro}" class="btn btn-outline-light btn-sm ms-2"
+              >Regístrate</a
+            >
+          </div>
+          <div th:if="${session.usuarioId != null}">
+            <span class="text-white me-3 fw-bold"
+              >Hola, <span th:text="${session.usuarioNombre}"></span
+            ></span>
+            <a
+              th:if="${session.usuarioRol == 'COMPRADOR'}"
+              th:href="@{/perfil}"
+              class="btn btn-outline-light btn-sm"
+            >
+              <i class="bi bi-person"></i> Mi Perfil
+            </a>
+            <a
+              th:if="${session.usuarioRol == 'COMPRADOR'}"
+              th:href="@{/carrito}"
+              class="btn btn-warning btn-sm ms-2"
+            >
+              <i class="bi bi-cart3"></i> Mi Carrito
+            </a>
+            <a
+              th:if="${session.usuarioRol == 'PROVEEDOR'}"
+              th:href="@{/proveedor/dashboard}"
+              class="btn btn-outline-light btn-sm"
+            >
+              <i class="bi bi-shop"></i> Mi Inventario
+            </a>
+            <a
+              th:if="${session.usuarioRol == 'ADMIN'}"
+              th:href="@{/admin/dashboard}"
+              class="btn btn-dark btn-sm"
+            >
+              <i class="bi bi-shield-lock"></i> Panel Admin
+            </a>
+            <a
+              th:href="@{/logout}"
+              class="btn btn-danger btn-sm ms-2"
+              title="Cerrar Sesión"
+            >
+              <i class="bi bi-box-arrow-right"></i>
+            </a>
+          </div>
         </div>
       </div>
     </nav>
@@ -37,7 +88,7 @@
       <div class="row">
         <!-- Tarjeta Izquierda: Datos del Usuario -->
         <div class="col-md-4 mb-4">
-          <div class="card shadow-sm h-100 border-0">
+          <div class="card shadow-sm h-100 border-0 rounded-4">
             <div class="card-body">
               <h5 class="card-title border-bottom pb-2 mb-3">
                 <i class="bi bi-person-badge text-primary"></i> Datos del
@@ -64,7 +115,7 @@
               <div class="mt-4">
                 <a
                   th:href="@{/perfil/eliminarCuenta}"
-                  class="btn btn-danger w-100 fw-bold"
+                  class="btn btn-danger w-100 fw-bold rounded-pill"
                   onclick="
                     return confirm(
                       'ATENCIÓN: ¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer y borrará todo tu historial.',
@@ -80,7 +131,7 @@
 
         <!-- Tarjeta Derecha: Métodos de Pago -->
         <div class="col-md-8 mb-4">
-          <div class="card shadow-sm h-100 border-0">
+          <div class="card shadow-sm h-100 border-0 rounded-4">
             <div class="card-body">
               <div
                 class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3"
@@ -89,7 +140,7 @@
                   <i class="bi bi-wallet2 text-primary"></i> Mis Métodos de Pago
                 </h5>
                 <button
-                  class="btn btn-sm btn-primary fw-bold"
+                  class="btn btn-sm btn-primary fw-bold rounded-pill"
                   data-bs-toggle="modal"
                   data-bs-target="#modalPago"
                 >
@@ -111,7 +162,6 @@
                   <tbody>
                     <tr th:each="pago : ${formasPago}">
                       <td>
-                        <!-- Iconos según el tipo -->
                         <i
                           th:if="${pago.tipo == 'Visa'}"
                           class="bi bi-credit-card-2-front-fill text-primary fs-5 me-2"
@@ -140,7 +190,6 @@
                         </a>
                       </td>
                     </tr>
-                    <!-- Mensaje si no hay pagos guardados -->
                     <tr th:if="${#lists.isEmpty(formasPago)}">
                       <td colspan="4" class="text-center text-muted py-3">
                         No tienes métodos de pago registrados.
@@ -158,8 +207,8 @@
     <!-- Modal Nuevo Método de Pago -->
     <div class="modal fade" id="modalPago" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog">
-        <div class="modal-content border-0">
-          <div class="modal-header bg-primary text-white">
+        <div class="modal-content border-0 rounded-4">
+          <div class="modal-header bg-primary text-white border-0">
             <h5 class="modal-title">
               <i class="bi bi-credit-card"></i> Nuevo Método de Pago
             </h5>
@@ -169,15 +218,14 @@
               data-bs-dismiss="modal"
             ></button>
           </div>
-          <!-- Formulario para agregar nuevo método de pago -->
           <form
             th:action="@{/perfil/pago/guardar}"
             th:object="${nuevaFormaPago}"
             method="post"
           >
-            <div class="modal-body">
+            <div class="modal-body p-4">
               <div class="mb-3">
-                <label class="form-label">Red / Plataforma</label>
+                <label class="form-label fw-bold small">Red / Plataforma</label>
                 <select
                   class="form-select"
                   th:field="*{tipo}"
@@ -189,12 +237,10 @@
                   <option value="PayPal">PayPal</option>
                 </select>
               </div>
-
               <div class="mb-3">
-                <label class="form-label" id="lblDetalle"
+                <label class="form-label fw-bold small" id="lblDetalle"
                   >Número de Tarjeta</label
                 >
-                <!-- Se agregó maxlength="19" (16 dígitos + 3 espacios) -->
                 <input
                   type="text"
                   class="form-control"
@@ -205,10 +251,10 @@
                   required
                 />
               </div>
-
               <div class="mb-3" id="divExpiracion">
-                <label class="form-label">Fecha de Expiración</label>
-                <!-- Se agregó el id="inputExpiracion" y maxlength="5" -->
+                <label class="form-label fw-bold small"
+                  >Fecha de Expiración</label
+                >
                 <input
                   type="text"
                   class="form-control"
@@ -218,22 +264,23 @@
                   placeholder="MM/AA"
                 />
               </div>
-
-              <!-- Alerta informativa para PayPal -->
-              <div id="alertaPaypal" class="alert alert-info py-2 d-none">
+              <div id="alertaPaypal" class="alert alert-info py-2 d-none small">
                 <i class="bi bi-info-circle"></i> Serás redirigido a PayPal en
                 tu próxima compra para validar el correo.
               </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer border-0">
               <button
                 type="button"
-                class="btn btn-secondary"
+                class="btn btn-secondary fw-bold rounded-pill"
                 data-bs-dismiss="modal"
               >
                 Cancelar
               </button>
-              <button type="submit" class="btn btn-primary fw-bold">
+              <button
+                type="submit"
+                class="btn btn-primary fw-bold rounded-pill"
+              >
                 Guardar Pago
               </button>
             </div>
@@ -246,7 +293,6 @@
 
     <!-- Script de Lógica e Interactividad -->
     <script>
-      // 1. Lógica para cambiar entre Tarjeta y PayPal
       function cambiarFormulario() {
         const seleccion = document.getElementById("tipoPago").value;
         const lblDetalle = document.getElementById("lblDetalle");
@@ -255,7 +301,6 @@
         const alertaPaypal = document.getElementById("alertaPaypal");
         const inputExpiracion = document.getElementById("inputExpiracion");
 
-        // Limpiamos AMBOS campos automáticamente cada vez que se cambia la opción
         inputDetalle.value = "";
         inputExpiracion.value = "";
 
@@ -278,35 +323,24 @@
         }
       }
 
-      // 2. Lógica para formateo automático (Tarjetas y Fechas)
       document.addEventListener("DOMContentLoaded", function () {
         const inputDetalle = document.getElementById("inputDetalle");
         const inputExpiracion = document.getElementById("inputExpiracion");
 
-        // Formato para Número de Tarjeta
         inputDetalle.addEventListener("input", function (e) {
           const seleccion = document.getElementById("tipoPago").value;
           if (seleccion !== "PayPal") {
-            // Elimina todo lo que no sea un número (letras, símbolos)
             let value = e.target.value.replace(/\D/g, "");
-            // Limita matemáticamente a 16 dígitos
             value = value.substring(0, 16);
-            // Agrega un espacio vacío cada 4 dígitos
             let formatted = value.match(/.{1,4}/g)?.join(" ") || value;
             e.target.value = formatted;
           }
         });
 
-        // Formato para Fecha de Expiración
         inputExpiracion.addEventListener("input", function (e) {
-          // Permite que la tecla "Borrar" funcione sin que la barra se atasque
           if (e.inputType === "deleteContentBackward") return;
-
-          // Elimina letras y limita a 4 dígitos
           let value = e.target.value.replace(/\D/g, "");
           value = value.substring(0, 4);
-
-          // Si el usuario ya digitó el mes (2 números), inyecta la barra '/'
           if (value.length > 2) {
             value = value.substring(0, 2) + "/" + value.substring(2, 4);
           }
