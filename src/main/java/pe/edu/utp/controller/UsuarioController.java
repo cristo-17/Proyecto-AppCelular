@@ -21,9 +21,6 @@ public class UsuarioController {
     private pe.edu.utp.service.FormaPagoService formaPagoService;
 
     @Autowired
-    private pe.edu.utp.service.CelularService celularService;
-
-    @Autowired
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     // Muestra la página de registro
@@ -56,29 +53,6 @@ public class UsuarioController {
         usuarioService.guardar(usuario);
 
         return "redirect:/login?exito=true";
-    }
-
-    // Muestra el Dashboard del Administrador
-    @GetMapping("/admin/dashboard")
-    public String dashboardAdmin(Model model, jakarta.servlet.http.HttpSession session) {
-
-        Long usuarioId = (Long) session.getAttribute("usuarioId");
-
-        if (usuarioId == null || !"ADMIN".equals(session.getAttribute("usuarioRol"))) {
-            return "redirect:/login";
-        }
-
-        List<pe.edu.utp.model.Celular> inventarioGlobal = celularService.listarTodos();
-        model.addAttribute("inventarioGlobal", inventarioGlobal);
-
-        return "admin_dashboard";
-    }
-
-    // Elimina un usuario (solo para Admin)
-    @GetMapping("/admin/eliminar/{id}")
-    public String eliminarUsuario(@PathVariable Long id) {
-        usuarioService.eliminar(id);
-        return "redirect:/admin/dashboard";
     }
 
     // Muestra el perfil del usuario con sus datos y métodos de pago

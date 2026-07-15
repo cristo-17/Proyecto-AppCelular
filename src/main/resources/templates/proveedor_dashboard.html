@@ -447,14 +447,33 @@
         class="card shadow-sm border-0 mb-4 border-top border-primary border-4"
       >
         <div class="card-body">
-          <h4 class="m-0 fw-bold text-dark mb-4">
-            <i class="bi bi-box2"></i> Gestión de Pedidos Pendientes
-          </h4>
-          <p class="text-muted small mb-3">
-            <i class="bi bi-info-circle"></i> Aquí aparecerán las órdenes de los
-            clientes que han comprado tus equipos. Empaqueta y despacha los
-            productos a tiempo para mantener tu buena calificación.
-          </p>
+          <!-- Encabezado con Buscador Integrado -->
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3"
+          >
+            <div>
+              <h4 class="m-0 fw-bold text-dark">
+                <i class="bi bi-box2"></i> Gestión de Pedidos Pendientes
+              </h4>
+              <p class="text-muted small m-0 mt-1">
+                <i class="bi bi-info-circle"></i> Empaqueta y despacha los
+                productos a la dirección indicada para mantener tu buena
+                calificación.
+              </p>
+            </div>
+            <!-- Barra de Búsqueda -->
+            <div class="input-group" style="max-width: 350px">
+              <input
+                type="text"
+                id="buscadorPedidos"
+                class="form-control"
+                placeholder="Buscar orden, cliente o dirección..."
+              />
+              <span class="input-group-text bg-primary text-white"
+                ><i class="bi bi-search"></i
+              ></span>
+            </div>
+          </div>
 
           <div class="table-responsive">
             <table class="table table-bordered align-middle text-center">
@@ -462,22 +481,26 @@
                 <tr>
                   <th>N° Orden</th>
                   <th>Fecha</th>
-                  <th>Cliente</th>
-                  <th>Equipos Vendidos</th>
+                  <th class="text-start">Cliente y Contacto</th>
+                  <th class="text-start">Dirección de Entrega</th>
+                  <th class="text-start">Equipos Vendidos</th>
                   <th>Estado Logístico</th>
                   <th>Acción</th>
                 </tr>
               </thead>
               <tbody>
                 <tr th:if="${#lists.isEmpty(misPedidos)}">
-                  <td colspan="6" class="text-center text-muted py-4">
+                  <td colspan="7" class="text-center text-muted py-4">
                     Aún no tienes pedidos registrados.
                   </td>
                 </tr>
 
                 <!-- Bucle de Pedidos Reales -->
-                <tr th:each="pedido : ${misPedidos}">
-                  <td class="fw-bold" th:text="${pedido.numeroOrden}">
+                <tr th:each="pedido : ${misPedidos}" class="fila-pedido">
+                  <td
+                    class="fw-bold pedido-orden"
+                    th:text="${pedido.numeroOrden}"
+                  >
                     #ORD-000
                   </td>
                   <td
@@ -485,14 +508,35 @@
                   >
                     14/07/2026
                   </td>
-                  <td
-                    th:text="${pedido.comprador.nombres + ' ' + pedido.comprador.apellidos}"
-                  >
-                    Cliente
+
+                  <!-- Nueva Columna: Nombre y Correo -->
+                  <td class="text-start pedido-cliente">
+                    <div
+                      class="fw-bold"
+                      th:text="${pedido.comprador.nombres + ' ' + pedido.comprador.apellidos}"
+                    >
+                      Cliente
+                    </div>
+                    <small class="text-muted"
+                      ><i class="bi bi-envelope"></i>
+                      <span th:text="${pedido.comprador.correo}"
+                        >correo</span
+                      ></small
+                    >
                   </td>
+
+                  <!-- Nueva Columna: Dirección Exacta -->
+                  <td class="text-start pedido-direccion">
+                    <small class="fw-bold text-dark"
+                      ><i class="bi bi-geo-alt-fill text-danger"></i>
+                      <span th:text="${pedido.direccionEnvio}"
+                        >Dirección...</span
+                      ></small
+                    >
+                  </td>
+
                   <td class="text-start">
                     <ul class="mb-0 small ps-3">
-                      <!-- Sub-bucle para listar los celulares específicos de este pedido -->
                       <li
                         th:each="detalle : ${pedido.detalles}"
                         th:text="${detalle.cantidad + 'x ' + detalle.celular.marca + ' ' + detalle.celular.modelo}"
@@ -502,7 +546,6 @@
                     </ul>
                   </td>
 
-                  <!-- Etiquetas dinámicas de colores según el estado -->
                   <td>
                     <span
                       th:if="${pedido.estadoLogistico == 'Pendiente'}"
@@ -521,7 +564,6 @@
                     >
                   </td>
 
-                  <!-- Formulario con botones de Acción Dinámicos -->
                   <td>
                     <form
                       th:action="@{/proveedor/pedido/estado}"
@@ -534,7 +576,6 @@
                         th:value="${pedido.id}"
                       />
 
-                      <!-- Si está Pendiente, mostrar botón "En Camino" -->
                       <button
                         th:if="${pedido.estadoLogistico == 'Pendiente'}"
                         type="submit"
@@ -550,7 +591,6 @@
                         <i class="bi bi-truck"></i> Marcar En Camino
                       </button>
 
-                      <!-- Si está En Camino, mostrar botón "Entregado" -->
                       <button
                         th:if="${pedido.estadoLogistico == 'En Camino'}"
                         type="submit"
@@ -757,6 +797,39 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const buscadorPedidos = document.getElementById("buscadorPedidos");
+
+        if (buscadorPedidos) {
+          buscadorPedidos.addEventListener("keyup", function () {
+            const textoBuscado = this.value.toLowerCase();
+            const filas = document.querySelectorAll(".fila-pedido");
+
+            filas.forEach(function (fila) {
+              const orden = fila
+                .querySelector(".pedido-orden")
+                .textContent.toLowerCase();
+              const cliente = fila
+                .querySelector(".pedido-cliente")
+                .textContent.toLowerCase();
+              const direccion = fila
+                .querySelector(".pedido-direccion")
+                .textContent.toLowerCase();
+
+              if (
+                orden.includes(textoBuscado) ||
+                cliente.includes(textoBuscado) ||
+                direccion.includes(textoBuscado)
+              ) {
+                fila.style.display = "";
+              } else {
+                fila.style.display = "none";
+              }
+            });
+          });
+        }
+      });
+
       function actualizarPrevisualizacion() {
         const inputUrl = document.getElementById("inputImagenUrl").value;
         const imagenPreview = document.getElementById("previewImagen");

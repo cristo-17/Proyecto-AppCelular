@@ -15,7 +15,7 @@ public class Pedido {
     @Column(name = "numero_orden", nullable = false, unique = true, length = 20)
     private String numeroOrden;
 
-    @Column(name = "fecha_pedido", insertable = false, updatable = false)
+    @Column(name = "fecha_pedido")
     private LocalDateTime fechaPedido;
 
     // Aquí guardaremos: Pendiente, En Camino, Entregado
