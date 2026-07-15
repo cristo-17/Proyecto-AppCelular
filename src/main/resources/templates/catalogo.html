@@ -191,19 +191,22 @@
                   <span th:text="${celular.ram}"></span> RAM
                 </p>
                 <div class="d-flex gap-2">
+                  <!-- Solo se muestra si es COMPRADOR -->
                   <a
-                    th:if="${session.usuarioId != null}"
+                    th:if="${session.usuarioRol == 'COMPRADOR'}"
                     th:href="@{/carrito/agregar/{id}(id=${celular.id})}"
                     class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-4"
-                    ><i class="bi bi-cart-plus"></i> Añadir al Carrito</a
                   >
+                    <i class="bi bi-cart-plus"></i> Añadir al Carrito
+                  </a>
+                  <!-- Solo se muestra si NO hay sesión (Usuario invitado) -->
                   <a
                     th:if="${session.usuarioId == null}"
                     th:href="@{/login}"
                     class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm px-4"
-                    ><i class="bi bi-cart-plus"></i> Iniciar Sesión para
-                    comprar</a
                   >
+                    <i class="bi bi-cart-plus"></i> Iniciar Sesión para comprar
+                  </a>
                 </div>
               </div>
             </div>
@@ -319,8 +322,17 @@
                   <li class="mb-1">
                     <i class="bi bi-memory text-primary"></i>
                     <strong>RAM:</strong>
-                    <span th:text="${celular.ram}"></span> |
-                    <strong>ROM:</strong>
+                    <span th:text="${celular.ram}"></span>
+                    <!-- Popover de RAM -->
+                    <i
+                      class="bi bi-info-circle text-primary ms-1"
+                      data-bs-toggle="popover"
+                      data-bs-trigger="hover focus"
+                      data-bs-placement="top"
+                      data-bs-content="Determina la fluidez al abrir múltiples aplicaciones."
+                    ></i>
+                    |
+                    <strong>Almacenamiento interno:</strong>
                     <span th:text="${celular.almacenamiento}"></span>
                   </li>
                   <li class="mb-1">
@@ -336,6 +348,18 @@
                     <i class="bi bi-camera text-primary"></i>
                     <strong>Cámara:</strong>
                     <span th:text="${celular.camaraPrincipal}"></span>
+                    <!-- Popover de Cámara -->
+                    <i
+                      class="bi bi-info-circle text-primary ms-1"
+                      data-bs-toggle="popover"
+                      data-bs-trigger="hover focus"
+                      data-bs-placement="top"
+                      data-bs-content="Resolución del lente principal del equipo."
+                    ></i>
+                    |
+                    <!-- Batería restaurada -->
+                    <i class="bi bi-battery-half text-primary ms-1"></i>
+                    <span th:text="${celular.bateria}"></span>
                   </li>
                 </ul>
                 <div class="mt-2 text-center">
@@ -361,6 +385,7 @@
             <div
               class="card-footer bg-white border-top-0 d-grid gap-2 p-3 pt-0"
             >
+              <!-- Solo para invitados -->
               <a
                 th:if="${session.usuarioId == null}"
                 th:href="@{/login}"
@@ -368,13 +393,17 @@
               >
                 <i class="bi bi-cart-plus"></i> Iniciar sesión
               </a>
+
+              <!-- Solo para el rol COMPRADOR -->
               <a
-                th:if="${session.usuarioId != null}"
+                th:if="${session.usuarioRol == 'COMPRADOR'}"
                 th:href="@{/carrito/agregar/{id}(id=${celular.id})}"
                 class="btn btn-primary fw-bold rounded-pill shadow-sm"
               >
                 <i class="bi bi-cart-plus"></i> Al carrito
               </a>
+
+              <!-- Este botón siempre se muestra para todos (Admin, Proveedor, Comprador o Invitado) -->
               <button
                 class="btn btn-outline-secondary rounded-pill"
                 data-bs-toggle="modal"
