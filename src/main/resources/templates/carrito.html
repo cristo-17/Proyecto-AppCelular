@@ -44,6 +44,7 @@
       </div>
 
       <div class="row">
+        <!-- SECCIÓN IZQUIERDA: LISTA DE PRODUCTOS -->
         <div class="col-lg-8 mb-4">
           <div class="card shadow-sm border-0">
             <div class="card-body p-0">
@@ -104,12 +105,59 @@
                       >
                         S/ 0.00
                       </td>
-                      <td
-                        class="text-center fw-bold text-primary"
-                        th:text="${item.cantidad}"
-                      >
-                        1
+
+                      <!-- COLUMNA CANTIDAD CON BOTONES INTERACTIVOS 100% SEGUROS -->
+                      <td class="text-center align-middle">
+                        <div
+                          class="input-group input-group-sm mx-auto"
+                          style="width: 120px"
+                        >
+                          <!-- Botón Restar -->
+                          <button
+                            class="btn btn-outline-secondary fw-bold"
+                            type="button"
+                            th:data-id="${item.celular.id}"
+                            th:data-cantidad="${item.cantidad}"
+                            th:data-nombre="${item.celular.marca + ' ' + item.celular.modelo}"
+                            onclick="
+                              evaluarResta(
+                                this.getAttribute('data-id'),
+                                this.getAttribute('data-cantidad'),
+                                this.getAttribute('data-nombre'),
+                              )
+                            "
+                          >
+                            <i class="bi bi-dash"></i>
+                          </button>
+
+                          <!-- Input visual (Solo lectura) -->
+                          <input
+                            type="text"
+                            class="form-control text-center fw-bold text-primary bg-white"
+                            th:value="${item.cantidad}"
+                            readonly
+                          />
+
+                          <!-- Botón Sumar -->
+                          <button
+                            class="btn btn-outline-secondary fw-bold"
+                            type="button"
+                            th:data-id="${item.celular.id}"
+                            th:data-cantidad="${item.cantidad}"
+                            th:data-stock="${item.celular.stock != null ? item.celular.stock : 0}"
+                            onclick="
+                              evaluarSuma(
+                                this.getAttribute('data-id'),
+                                this.getAttribute('data-cantidad'),
+                                this.getAttribute('data-stock'),
+                              )
+                            "
+                          >
+                            <i class="bi bi-plus"></i>
+                          </button>
+                        </div>
                       </td>
+
                       <td
                         class="text-center fw-bold text-success"
                         th:text="'S/ ' + ${#numbers.formatDecimal(item.subtotal, 1, 'COMMA', 2, 'POINT')}"
@@ -133,6 +181,7 @@
           </div>
         </div>
 
+        <!-- SECCIÓN DERECHA: RESUMEN Y PAGO -->
         <div class="col-lg-4">
           <div class="card shadow-sm border-0">
             <div class="card-body">
@@ -144,41 +193,70 @@
                 <span class="text-muted">Subtotal</span>
                 <span
                   class="fw-bold"
-                  th:text="'S/ ' + ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}"
+                  th:text="'S/ ' + ${#numbers.formatDecimal(subtotal, 1, 'COMMA', 2, 'POINT')}"
                   >S/ 0.00</span
                 >
               </div>
+
               <div class="d-flex justify-content-between mb-3">
                 <span class="text-muted">Envío</span>
-                <span class="text-success fw-bold">Gratis</span>
+                <span th:if="${costoEnvio == 0}" class="text-success fw-bold"
+                  >Gratis</span
+                >
+                <span
+                  th:if="${costoEnvio > 0}"
+                  class="text-danger fw-bold"
+                  th:text="'+ S/ ' + ${#numbers.formatDecimal(costoEnvio, 1, 'COMMA', 2, 'POINT')}"
+                  >S/ 50.00</span
+                >
               </div>
 
               <div class="d-flex justify-content-between border-top pt-3 mb-4">
                 <h5 class="fw-bold m-0">Total</h5>
                 <h4
                   class="text-success fw-bold m-0"
-                  th:text="'S/ ' + ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}"
+                  th:text="'S/ ' + ${#numbers.formatDecimal(totalFinal, 1, 'COMMA', 2, 'POINT')}"
                 >
                   S/ 0.00
                 </h4>
               </div>
 
-              <form
-                th:if="${not #lists.isEmpty(carrito)}"
-                th:action="@{/carrito/pagar}"
-                method="post"
-              >
-                <button
-                  type="submit"
-                  class="btn btn-primary btn-lg w-100 fw-bold"
-                  onclick="
-                    return confirm('¿Confirmar pago y procesar la orden?');
-                  "
-                >
-                  <i class="bi bi-credit-card"></i> Proceder al Pago
-                </button>
-              </form>
+              <!-- BOTÓN DE PAGO: LOGICA DE TARJETAS -->
+              <div th:if="${not #lists.isEmpty(carrito) and tieneTarjeta}">
+                <form th:action="@{/carrito/pagar}" method="post">
+                  <button
+                    type="submit"
+                    class="btn btn-primary btn-lg w-100 fw-bold"
+                    onclick="
+                      return confirm('¿Confirmar pago y procesar la orden?');
+                    "
+                  >
+                    <i class="bi bi-credit-card"></i> Proceder al Pago
+                  </button>
+                </form>
+              </div>
 
+              <!-- MENSAJE DE ADVERTENCIA: SI NO TIENE TARJETA -->
+              <div th:if="${not #lists.isEmpty(carrito) and not tieneTarjeta}">
+                <div
+                  class="alert alert-warning text-center p-2 mb-3 shadow-sm border-warning"
+                >
+                  <i
+                    class="bi bi-exclamation-triangle-fill fs-4 d-block mb-1"
+                  ></i>
+                  <small class="fw-bold"
+                    >No tienes un método de pago registrado.</small
+                  >
+                </div>
+                <a
+                  th:href="@{/perfil}"
+                  class="btn btn-warning btn-lg w-100 fw-bold text-dark"
+                >
+                  <i class="bi bi-wallet2"></i> Registrar Tarjeta
+                </a>
+              </div>
+
+              <!-- BOTÓN DESACTIVADO: SI EL CARRITO ESTA VACIO -->
               <button
                 th:if="${#lists.isEmpty(carrito)}"
                 class="btn btn-secondary btn-lg w-100 fw-bold"
@@ -192,6 +270,91 @@
       </div>
     </div>
 
+    <!-- MODAL BOOTSTRAP: ADVERTENCIA AL REDUCIR A CERO -->
+    <div
+      class="modal fade"
+      id="modalEliminarItem"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-header bg-danger text-white border-0">
+            <h5 class="modal-title fw-bold">
+              <i class="bi bi-trash"></i> Eliminar Producto
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body text-center py-4">
+            <i
+              class="bi bi-exclamation-circle text-warning mb-3"
+              style="font-size: 3.5rem"
+            ></i>
+            <h5 class="mb-2">
+              ¿Estás seguro que deseas eliminar este producto de tu carrito?
+            </h5>
+            <h6 class="text-danger fw-bold fs-5" id="modalNombreProducto"></h6>
+          </div>
+          <div class="modal-footer justify-content-center border-0 bg-light">
+            <button
+              type="button"
+              class="btn btn-secondary px-4 fw-bold"
+              data-bs-dismiss="modal"
+            >
+              No, mantener 1
+            </button>
+            <a
+              href="#"
+              id="btnConfirmarEliminar"
+              class="btn btn-danger px-4 fw-bold"
+              >Sí, eliminar</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- LÓGICA JAVASCRIPT SEGURA PARA LOS BOTONES + Y - -->
+    <script>
+      function evaluarResta(id, cantidadActual, nombreProducto) {
+        // Convertimos a entero por seguridad
+        var cantidad = parseInt(cantidadActual);
+
+        if (cantidad <= 1) {
+          document.getElementById("modalNombreProducto").innerText =
+            nombreProducto;
+          document.getElementById("btnConfirmarEliminar").href =
+            "/carrito/eliminar/" + id;
+          var modal = new bootstrap.Modal(
+            document.getElementById("modalEliminarItem"),
+          );
+          modal.show();
+        } else {
+          window.location.href = "/carrito/restar/" + id;
+        }
+      }
+
+      function evaluarSuma(id, cantidadActual, stockMaximo) {
+        var cantidad = parseInt(cantidadActual);
+        var stock = parseInt(stockMaximo);
+
+        if (cantidad >= stock) {
+          alert(
+            "¡Stock máximo alcanzado! Solo tenemos " +
+              stock +
+              " unidades disponibles de este equipo.",
+          );
+        } else {
+          window.location.href = "/carrito/agregar/" + id;
+        }
+      }
+    </script>
   </body>
 </html>

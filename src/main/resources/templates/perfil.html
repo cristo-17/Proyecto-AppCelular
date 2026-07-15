@@ -194,23 +194,27 @@
                 <label class="form-label" id="lblDetalle"
                   >Número de Tarjeta</label
                 >
-                <!-- Campo de entrada para el número de tarjeta o correo de PayPal -->
+                <!-- Se agregó maxlength="19" (16 dígitos + 3 espacios) -->
                 <input
                   type="text"
                   class="form-control"
                   th:field="*{numero}"
                   id="inputDetalle"
                   placeholder="0000 0000 0000 0000"
+                  maxlength="19"
                   required
                 />
               </div>
 
               <div class="mb-3" id="divExpiracion">
                 <label class="form-label">Fecha de Expiración</label>
+                <!-- Se agregó el id="inputExpiracion" y maxlength="5" -->
                 <input
                   type="text"
                   class="form-control"
                   th:field="*{fechaExpiracion}"
+                  id="inputExpiracion"
+                  maxlength="5"
                   placeholder="MM/AA"
                 />
               </div>
@@ -240,29 +244,75 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Script para cambiar el formulario según el tipo de pago -->
+    <!-- Script de Lógica e Interactividad -->
     <script>
+      // 1. Lógica para cambiar entre Tarjeta y PayPal
       function cambiarFormulario() {
         const seleccion = document.getElementById("tipoPago").value;
         const lblDetalle = document.getElementById("lblDetalle");
         const inputDetalle = document.getElementById("inputDetalle");
         const divExpiracion = document.getElementById("divExpiracion");
         const alertaPaypal = document.getElementById("alertaPaypal");
+        const inputExpiracion = document.getElementById("inputExpiracion");
+
+        // Limpiamos AMBOS campos automáticamente cada vez que se cambia la opción
+        inputDetalle.value = "";
+        inputExpiracion.value = "";
 
         if (seleccion === "PayPal") {
           lblDetalle.innerText = "Correo electrónico de PayPal";
           inputDetalle.placeholder = "tu@correo.com";
           inputDetalle.type = "email";
-          divExpiracion.classList.add("d-none"); // Ocultamos la fecha
-          alertaPaypal.classList.remove("d-none"); // Mostramos la alerta
+          inputDetalle.maxLength = 50;
+          divExpiracion.classList.add("d-none");
+          alertaPaypal.classList.remove("d-none");
+          inputExpiracion.required = false;
         } else {
           lblDetalle.innerText = "Número de Tarjeta";
           inputDetalle.placeholder = "0000 0000 0000 0000";
           inputDetalle.type = "text";
-          divExpiracion.classList.remove("d-none"); // Mostramos la fecha
-          alertaPaypal.classList.add("d-none"); // Ocultamos la alerta
+          inputDetalle.maxLength = 19;
+          divExpiracion.classList.remove("d-none");
+          alertaPaypal.classList.add("d-none");
+          inputExpiracion.required = true;
         }
       }
+
+      // 2. Lógica para formateo automático (Tarjetas y Fechas)
+      document.addEventListener("DOMContentLoaded", function () {
+        const inputDetalle = document.getElementById("inputDetalle");
+        const inputExpiracion = document.getElementById("inputExpiracion");
+
+        // Formato para Número de Tarjeta
+        inputDetalle.addEventListener("input", function (e) {
+          const seleccion = document.getElementById("tipoPago").value;
+          if (seleccion !== "PayPal") {
+            // Elimina todo lo que no sea un número (letras, símbolos)
+            let value = e.target.value.replace(/\D/g, "");
+            // Limita matemáticamente a 16 dígitos
+            value = value.substring(0, 16);
+            // Agrega un espacio vacío cada 4 dígitos
+            let formatted = value.match(/.{1,4}/g)?.join(" ") || value;
+            e.target.value = formatted;
+          }
+        });
+
+        // Formato para Fecha de Expiración
+        inputExpiracion.addEventListener("input", function (e) {
+          // Permite que la tecla "Borrar" funcione sin que la barra se atasque
+          if (e.inputType === "deleteContentBackward") return;
+
+          // Elimina letras y limita a 4 dígitos
+          let value = e.target.value.replace(/\D/g, "");
+          value = value.substring(0, 4);
+
+          // Si el usuario ya digitó el mes (2 números), inyecta la barra '/'
+          if (value.length > 2) {
+            value = value.substring(0, 2) + "/" + value.substring(2, 4);
+          }
+          e.target.value = value;
+        });
+      });
     </script>
   </body>
 </html>

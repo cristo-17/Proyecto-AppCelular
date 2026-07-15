@@ -39,7 +39,7 @@
             <h4 class="card-title fw-bold mt-2">Iniciar Sesión</h4>
           </div>
 
-          <!-- Mensaje de Error Dinámico (Texto de 3 intentos o bloqueo) -->
+          <!-- Mensaje de Error Dinámico (Para bloqueos de cuenta) -->
           <div
             th:if="${error}"
             class="alert alert-danger text-center shadow-sm py-2"
@@ -57,10 +57,16 @@
                 type="text"
                 class="form-control"
                 name="correo"
-                th:classappend="${error != null} ? 'is-invalid' : ''"
+                th:classappend="${errorCorreo != null} ? 'is-invalid' : ''"
                 placeholder="juan@correo.com"
                 required
               />
+              <!-- Etiqueta roja personalizada para el correo -->
+              <div
+                th:if="${errorCorreo != null}"
+                class="invalid-feedback fw-bold"
+                th:text="${errorCorreo}"
+              ></div>
             </div>
 
             <div class="mb-4">
@@ -69,10 +75,16 @@
                 type="password"
                 class="form-control"
                 name="contrasena"
-                th:classappend="${error != null} ? 'is-invalid' : ''"
+                th:classappend="${errorContrasena != null} ? 'is-invalid' : ''"
                 placeholder="Mínimo 6 caracteres"
                 required
               />
+              <!-- Etiqueta roja personalizada para la contraseña -->
+              <div
+                th:if="${errorContrasena != null}"
+                class="invalid-feedback fw-bold"
+                th:text="${errorContrasena}"
+              ></div>
             </div>
 
             <div class="d-grid gap-2">

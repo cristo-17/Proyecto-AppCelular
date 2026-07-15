@@ -21,6 +21,11 @@ public class CelularService {
         return celularRepository.findByProveedorId(proveedorId);
     }
 
+    // Añade esto dentro de tu clase CelularService
+    public List<Celular> buscarPorMarca(String marca) {
+        return celularRepository.findByMarcaIgnoreCase(marca);
+    }
+
     public Optional<Celular> buscarPorId(Long id) {
         return celularRepository.findById(id);
     }

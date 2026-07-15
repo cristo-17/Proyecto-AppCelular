@@ -16,10 +16,10 @@
   <body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
       <div class="container-fluid">
-        <a class="navbar-brand fw-bold" th:href="@{/}"
-          ><i class="bi bi-phone"></i> AppCelulares
-          <span class="badge bg-success ms-2">Proveedor</span></a
-        >
+        <a class="navbar-brand fw-bold" th:href="@{/}">
+          <i class="bi bi-phone"></i> AppCelulares
+          <span class="badge bg-success ms-2">Proveedor</span>
+        </a>
         <div class="d-flex align-items-center">
           <span
             class="navbar-text text-white me-3 d-none d-md-block"
@@ -34,6 +34,7 @@
     </nav>
 
     <div class="container-fluid px-4">
+      <!-- Alertas -->
       <div
         th:if="${errorValidacion}"
         class="alert alert-danger alert-dismissible fade show shadow-sm"
@@ -62,12 +63,15 @@
         ></button>
       </div>
 
-      <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+      <!-- ========================================== -->
+      <!-- 1. TARJETAS DE MÉTRICAS (Ahora 4 columnas) -->
+      <!-- ========================================== -->
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
         <div class="col">
           <div class="card bg-primary text-white h-100 shadow border-0">
             <div class="card-body text-center">
               <i class="bi bi-phone-vibrate fs-1 mb-2"></i>
-              <h5 class="card-title">Mis Celulares Publicados</h5>
+              <h5 class="card-title">Mis Celulares</h5>
               <h2
                 class="fw-bold"
                 th:text="${#lists.size(celulares)} + ' Equipos'"
@@ -95,20 +99,38 @@
           <div class="card bg-warning text-dark h-100 shadow border-0">
             <div class="card-body text-center">
               <i class="bi bi-star-fill fs-1 mb-2"></i>
-              <h5 class="card-title">Calificación Promedio</h5>
+              <h5 class="card-title">Calificación Media</h5>
               <h2 class="fw-bold">
                 <span
                   th:text="${#numbers.formatDecimal(promedioEstrellas, 1, 'COMMA', 1, 'POINT')}"
-                  >4.9</span
+                  >0.0</span
                 >
                 <i class="bi bi-star-fill fs-4"></i>
               </h2>
             </div>
           </div>
         </div>
+        <div class="col">
+          <div class="card bg-info text-dark h-100 shadow border-0">
+            <div class="card-body text-center">
+              <i class="bi bi-cash-coin fs-1 mb-2"></i>
+              <h5 class="card-title">Ingresos del Mes</h5>
+              <!-- Usamos un fallback seguro hasta que exista la tabla de ventas -->
+              <h2
+                class="fw-bold"
+                th:text="'S/ ' + ${#numbers.formatDecimal(ingresosMes ?: 0.00, 1, 'COMMA', 2, 'POINT')}"
+              >
+                S/ 0.00
+              </h2>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="card shadow-sm border-0 mb-4">
+      <!-- ========================================== -->
+      <!-- 2. GESTIÓN DE INVENTARIO CON SEMÁFORO      -->
+      <!-- ========================================== -->
+      <div class="card shadow-sm border-0 mb-5">
         <div class="card-body">
           <div
             class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4"
@@ -138,7 +160,11 @@
                 </tr>
               </thead>
               <tbody>
-                <tr th:each="celular : ${celulares}">
+                <!-- Semáforo: Se pinta de amarillo si el stock es <= 5 -->
+                <tr
+                  th:each="celular : ${celulares}"
+                  th:classappend="${celular.stock <= 5} ? 'table-warning' : ''"
+                >
                   <td th:text="'#PROD-' + ${celular.id}">#PROD-001</td>
                   <td class="text-center">
                     <img
@@ -158,7 +184,7 @@
                     class="fw-bold"
                     th:text="${celular.marca + ' ' + celular.modelo}"
                   >
-                    Samsung Galaxy
+                    Modelo
                   </td>
                   <td
                     class="text-success fw-bold"
@@ -168,12 +194,17 @@
                   </td>
                   <td>
                     <span
-                      class="badge bg-primary rounded-pill px-3"
+                      class="badge bg-primary rounded-pill px-3 fs-6"
                       th:text="${celular.stock}"
                       >0</span
                     >
+                    <!-- Alerta de Stock Crítico -->
+                    <span
+                      th:if="${celular.stock <= 5}"
+                      class="badge bg-danger ms-2"
+                      ><i class="bi bi-exclamation-triangle"></i> Bajo</span
+                    >
                   </td>
-
                   <td class="text-center">
                     <button
                       class="btn btn-sm btn-outline-primary"
@@ -196,6 +227,7 @@
                       <i class="bi bi-trash"></i>
                     </a>
 
+                    <!-- Modal de Edición (Igual que tu versión original) -->
                     <div
                       class="modal fade text-start"
                       th:id="'modalEditar-' + ${celular.id}"
@@ -212,7 +244,6 @@
                               type="button"
                               class="btn-close btn-close-white"
                               data-bs-dismiss="modal"
-                              aria-label="Close"
                             ></button>
                           </div>
                           <form th:action="@{/proveedor/guardar}" method="post">
@@ -408,8 +439,149 @@
           </div>
         </div>
       </div>
+
+      <!-- ========================================== -->
+      <!-- 3. MÓDULO DE DESPACHOS Y PEDIDOS           -->
+      <!-- ========================================== -->
+      <div
+        class="card shadow-sm border-0 mb-4 border-top border-primary border-4"
+      >
+        <div class="card-body">
+          <h4 class="m-0 fw-bold text-dark mb-4">
+            <i class="bi bi-box2"></i> Gestión de Pedidos Pendientes
+          </h4>
+          <p class="text-muted small mb-3">
+            <i class="bi bi-info-circle"></i> Aquí aparecerán las órdenes de los
+            clientes que han comprado tus equipos. Empaqueta y despacha los
+            productos a tiempo para mantener tu buena calificación.
+          </p>
+
+          <div class="table-responsive">
+            <table class="table table-bordered align-middle text-center">
+              <thead class="table-dark">
+                <tr>
+                  <th>N° Orden</th>
+                  <th>Fecha</th>
+                  <th>Cliente</th>
+                  <th>Equipos Vendidos</th>
+                  <th>Estado Logístico</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:if="${#lists.isEmpty(misPedidos)}">
+                  <td colspan="6" class="text-center text-muted py-4">
+                    Aún no tienes pedidos registrados.
+                  </td>
+                </tr>
+
+                <!-- Bucle de Pedidos Reales -->
+                <tr th:each="pedido : ${misPedidos}">
+                  <td class="fw-bold" th:text="${pedido.numeroOrden}">
+                    #ORD-000
+                  </td>
+                  <td
+                    th:text="${#temporals.format(pedido.fechaPedido, 'dd/MM/yyyy')}"
+                  >
+                    14/07/2026
+                  </td>
+                  <td
+                    th:text="${pedido.comprador.nombres + ' ' + pedido.comprador.apellidos}"
+                  >
+                    Cliente
+                  </td>
+                  <td class="text-start">
+                    <ul class="mb-0 small ps-3">
+                      <!-- Sub-bucle para listar los celulares específicos de este pedido -->
+                      <li
+                        th:each="detalle : ${pedido.detalles}"
+                        th:text="${detalle.cantidad + 'x ' + detalle.celular.marca + ' ' + detalle.celular.modelo}"
+                      >
+                        1x Modelo
+                      </li>
+                    </ul>
+                  </td>
+
+                  <!-- Etiquetas dinámicas de colores según el estado -->
+                  <td>
+                    <span
+                      th:if="${pedido.estadoLogistico == 'Pendiente'}"
+                      class="badge bg-warning text-dark"
+                      ><i class="bi bi-hourglass-split"></i> Pendiente</span
+                    >
+                    <span
+                      th:if="${pedido.estadoLogistico == 'En Camino'}"
+                      class="badge bg-info text-dark"
+                      ><i class="bi bi-truck"></i> En Camino</span
+                    >
+                    <span
+                      th:if="${pedido.estadoLogistico == 'Entregado'}"
+                      class="badge bg-success"
+                      ><i class="bi bi-check2-all"></i> Entregado</span
+                    >
+                  </td>
+
+                  <!-- Formulario con botones de Acción Dinámicos -->
+                  <td>
+                    <form
+                      th:action="@{/proveedor/pedido/estado}"
+                      method="post"
+                      class="d-inline"
+                    >
+                      <input
+                        type="hidden"
+                        name="pedidoId"
+                        th:value="${pedido.id}"
+                      />
+
+                      <!-- Si está Pendiente, mostrar botón "En Camino" -->
+                      <button
+                        th:if="${pedido.estadoLogistico == 'Pendiente'}"
+                        type="submit"
+                        name="nuevoEstado"
+                        value="En Camino"
+                        class="btn btn-sm btn-primary fw-bold"
+                        onclick="
+                          return confirm(
+                            '¿Confirmar que el paquete ya fue despachado?',
+                          );
+                        "
+                      >
+                        <i class="bi bi-truck"></i> Marcar En Camino
+                      </button>
+
+                      <!-- Si está En Camino, mostrar botón "Entregado" -->
+                      <button
+                        th:if="${pedido.estadoLogistico == 'En Camino'}"
+                        type="submit"
+                        name="nuevoEstado"
+                        value="Entregado"
+                        class="btn btn-sm btn-success fw-bold"
+                        onclick="
+                          return confirm(
+                            '¿Confirmar que el cliente recibió el paquete?',
+                          );
+                        "
+                      >
+                        <i class="bi bi-check2-all"></i> Entregado
+                      </button>
+
+                      <span
+                        th:if="${pedido.estadoLogistico == 'Entregado'}"
+                        class="text-muted small fw-bold"
+                        >Completado</span
+                      >
+                    </form>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <!-- Modal Publicar (Igual que tu versión original) -->
     <div class="modal fade" id="modalPublicar" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -421,7 +593,6 @@
               type="button"
               class="btn-close btn-close-white"
               data-bs-dismiss="modal"
-              aria-label="Close"
             ></button>
           </div>
           <form

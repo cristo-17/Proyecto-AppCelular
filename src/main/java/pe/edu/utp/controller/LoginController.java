@@ -31,8 +31,6 @@ public class LoginController {
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     // --- SISTEMA DE BLOQUEO EN MEMORIA ---
-    // Usamos ConcurrentHashMap para que soporte múltiples usuarios intentando al
-    // mismo tiempo
     private final Map<String, Integer> intentosFallidos = new ConcurrentHashMap<>();
     private final Map<String, LocalDateTime> tiempoBloqueo = new ConcurrentHashMap<>();
     private final int MAX_INTENTOS = 3;
@@ -40,11 +38,10 @@ public class LoginController {
 
     @GetMapping("/login")
     public String mostrarLogin(HttpSession session) {
-        // Si el usuario ya inició sesión, lo redirigimos automáticamente
         if (session.getAttribute("usuarioId") != null) {
             return "redirect:/catalogo";
         }
-        return "index"; // Muestra la vista index.html
+        return "index";
     }
 
     @PostMapping("/login")
@@ -59,71 +56,62 @@ public class LoginController {
             LocalDateTime tiempoDesbloqueo = tiempoBloqueo.get(correo).plusMinutes(TIEMPO_BLOQUEO_MINUTOS);
 
             if (LocalDateTime.now().isBefore(tiempoDesbloqueo)) {
-                // Aún no ha pasado el tiempo de castigo
                 long minutosRestantes = ChronoUnit.MINUTES.between(LocalDateTime.now(), tiempoDesbloqueo) + 1;
                 redirectAttributes.addFlashAttribute("error",
                         "Cuenta bloqueada por múltiples intentos. Intente de nuevo en " + minutosRestantes
                                 + " minutos.");
                 return "redirect:/login";
             } else {
-                // Ya pasaron los 10 minutos, perdonamos al usuario y limpiamos su registro
                 tiempoBloqueo.remove(correo);
                 intentosFallidos.remove(correo);
             }
         }
 
-        // 2. INTENTAR BUSCAR AL USUARIO EN LA BASE DE DATOS
+        // 2. BUSCAR AL USUARIO EN LA BASE DE DATOS
         Usuario usuario = usuarioService.buscarPorCorreo(correo);
 
+        // ==========================================
+        // CASO A: EL CORREO NO EXISTE (No restamos intentos)
+        // ==========================================
+        if (usuario == null) {
+            redirectAttributes.addFlashAttribute("errorCorreo",
+                    "Lo sentimos, no coincide con nuestros registros. Comprueba que lo has escrito bien y vuelve a intentarlo.");
+            return "redirect:/login";
+        }
+
+        // ==========================================
+        // CASO B: EL CORREO EXISTE, VERIFICAMOS CONTRASEÑA
+        // ==========================================
         boolean credencialesValidas = false;
 
-        if (usuario != null) {
-            // BCrypt siempre genera cadenas que empiezan con "$2a$". Verificamos si ya está
-            // encriptada.
-            if (usuario.getContrasena().startsWith("$2a$")) {
-                // Compara la contraseña escrita (texto plano) con el hash de la BD
-                credencialesValidas = passwordEncoder.matches(contrasena, usuario.getContrasena());
-            } else {
-                // Es un usuario antiguo con contraseña en texto plano (ej. "1234")
-                credencialesValidas = usuario.getContrasena().equals(contrasena);
-
-                // MIGRACIÓN SILENCIOSA: Si logró entrar con su clave vieja, la encriptamos de
-                // inmediato y la actualizamos en la BD
-                if (credencialesValidas) {
-                    usuario.setContrasena(passwordEncoder.encode(contrasena));
-                    usuarioService.guardar(usuario); // Esto actualizará el registro en MySQL
-                }
+        if (usuario.getContrasena().startsWith("$2a$")) {
+            credencialesValidas = passwordEncoder.matches(contrasena, usuario.getContrasena());
+        } else {
+            credencialesValidas = usuario.getContrasena().equals(contrasena);
+            if (credencialesValidas) {
+                usuario.setContrasena(passwordEncoder.encode(contrasena));
+                usuarioService.guardar(usuario);
             }
         }
 
-        // Verificamos el resultado de la autenticación haciendo feliz al IDE
-        if (usuario != null && credencialesValidas) {
-            // ==========================================
+        if (credencialesValidas) {
             // --- LOGIN EXITOSO ---
-            // ==========================================
-
-            // Limpiamos el historial de errores si entró bien
             intentosFallidos.remove(correo);
             tiempoBloqueo.remove(correo);
 
-            // A) Generar el Token JWT con la lógica que creamos
             String token = jwtUtil.generateToken(usuario.getCorreo(), usuario.getRol(), usuario.getId(),
                     usuario.getNombres());
 
-            // B) Guardar el Token en una Cookie HTTP-Only para máxima seguridad
             Cookie jwtCookie = new Cookie("jwt", token);
-            jwtCookie.setHttpOnly(true); // Evita que código JavaScript malicioso lea el token
-            jwtCookie.setPath("/"); // Disponible en toda la aplicación
-            jwtCookie.setMaxAge(60 * 60 * 10); // Expira en 10 horas
+            jwtCookie.setHttpOnly(true);
+            jwtCookie.setPath("/");
+            jwtCookie.setMaxAge(60 * 60 * 10);
             response.addCookie(jwtCookie);
 
-            // C) Mantener las variables de sesión clásicas para que Thymeleaf siga
-            // funcionando
             session.setAttribute("usuarioId", usuario.getId());
             session.setAttribute("usuarioNombre", usuario.getNombres());
             session.setAttribute("usuarioRol", usuario.getRol());
 
-            // Redirecciones estratégicas según el rol
             if ("ADMIN".equals(usuario.getRol())) {
                 return "redirect:/admin/dashboard";
             } else if ("PROVEEDOR".equals(usuario.getRol())) {
@@ -132,23 +120,21 @@ public class LoginController {
             return "redirect:/catalogo";
 
         } else {
-            // ==========================================
-            // --- LOGIN FALLIDO ---
-            // ==========================================
+            // --- LOGIN FALLIDO POR CONTRASEÑA (Restamos intentos) ---
             int intentosActuales = intentosFallidos.getOrDefault(correo, 0) + 1;
             intentosFallidos.put(correo, intentosActuales);
 
             if (intentosActuales >= MAX_INTENTOS) {
-                // Alcanzó el límite, aplicamos el bloqueo y registramos la hora actual
                 tiempoBloqueo.put(correo, LocalDateTime.now());
+                // El bloqueo es un error general, se muestra arriba en la alerta
                 redirectAttributes.addFlashAttribute("error",
                         "Cuenta bloqueada por seguridad tras 3 intentos fallidos. Intente de nuevo en "
                                 + TIEMPO_BLOQUEO_MINUTOS + " minutos.");
             } else {
-                // Aún le quedan intentos
                 int intentosRestantes = MAX_INTENTOS - intentosActuales;
-                redirectAttributes.addFlashAttribute("error",
-                        "Credenciales incorrectas. Te quedan " + intentosRestantes + " intento(s).");
+                // El error de contraseña se muestra justo debajo del input correspondiente
+                redirectAttributes.addFlashAttribute("errorContrasena",
+                        "Contraseña incorrecta. Te quedan " + intentosRestantes + " intento(s).");
             }
             return "redirect:/login";
         }
@@ -156,16 +142,12 @@ public class LoginController {
 
     @GetMapping("/logout")
     public String cerrarSesion(HttpSession session, HttpServletResponse response) {
-        // 1. Destruir la memoria tradicional de Thymeleaf
         session.invalidate();
-
-        // 2. Destruir la Cookie del Token JWT enviando una expirada
         Cookie cookie = new Cookie("jwt", null);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setMaxAge(0); // El valor 0 obliga al navegador a borrarla inmediatamente
+        cookie.setMaxAge(0);
         response.addCookie(cookie);
-
         return "redirect:/";
     }
 }

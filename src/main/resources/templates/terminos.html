@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AppCelulares - Términos de Servicio</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+  </head>
+  <body class="bg-light pt-5">
+    <div class="container" style="max-width: 800px">
+      <a
+        th:href="@{/catalogo}"
+        class="text-decoration-none text-muted mb-4 d-inline-block"
+      >
+        <i class="bi bi-arrow-left"></i> Volver al inicio
+      </a>
+
+      <!-- Cabecera -->
+      <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-5">
+          <h1 class="fw-bold text-dark mb-2">Términos de Servicio</h1>
+          <p class="text-muted mb-0">Última actualización: 14/07/2026</p>
+        </div>
+      </div>
+
+      <!-- Contenido Adaptado -->
+      <div class="card border-0 shadow-sm rounded-4 mb-5">
+        <div class="card-body p-5 text-muted" style="line-height: 1.8">
+          <p>Términos y Condiciones de Uso | AppCelulares</p>
+          <p>
+            Bienvenido a <strong>AppCelulares</strong>. Al navegar en nuestro
+            sitio o realizar una compra, aceptas los términos que rigen nuestra
+            relación comercial. Nos esforzamos por ofrecerte la mejor tecnología
+            con la mayor transparencia posible.
+          </p>
+
+          <h5 class="fw-bold text-dark mt-4 mb-3">
+            1. Disponibilidad de Productos
+          </h5>
+          <p>
+            En AppCelulares nos enorgullecemos de ofrecer equipos móviles 100%
+            originales y garantizados:
+          </p>
+          <ul>
+            <li class="mb-2">
+              Las especificaciones técnicas listadas (RAM, CPU, Almacenamiento)
+              son exactas según el fabricante.
+            </li>
+            <li class="mb-2">
+              El stock está sujeto a disponibilidad en tiempo real. Si un
+              producto se agota milisegundos después de tu compra por
+              concurrencia, te notificaremos de inmediato para un cambio de
+              modelo o reembolso total.
+            </li>
+          </ul>
+
+          <h5 class="fw-bold text-dark mt-4 mb-3">
+            2. Procesos de Envío y Entrega
+          </h5>
+          <p>Queremos que la experiencia sea rápida y segura:</p>
+          <ul>
+            <li class="mb-2">
+              <strong>Cobertura:</strong> Realizamos envíos a todo el territorio
+              nacional peruano.
+            </li>
+            <li class="mb-2">
+              <strong>Tiempos:</strong> El tiempo estimado de entrega (24h a 48h
+              hábiles) se comunicará al procesar el pedido.
+            </li>
+            <li class="mb-2">
+              <strong>Responsabilidad:</strong> Es responsabilidad del cliente
+              proporcionar una dirección exacta en su perfil. AppCelulares no se
+              hace responsable por retrasos derivados de datos logísticos
+              incorrectos.
+            </li>
+          </ul>
+
+          <h5 class="fw-bold text-dark mt-4 mb-3">
+            3. Garantía y Devoluciones
+          </h5>
+          <p>
+            La calidad es nuestra prioridad. Si recibes un celular con defectos
+            de fábrica:
+          </p>
+          <ul>
+            <li class="mb-2">
+              Tienes un plazo de 72 horas tras recibir el paquete para reportar
+              cualquier inconveniente técnico.
+            </li>
+            <li class="mb-2">
+              El equipo debe estar en su empaque original, con todos sus
+              accesorios sellados y sin señales de caídas o golpes.
+            </li>
+            <li class="mb-2">
+              No se aceptan devoluciones por "cambio de opinión" una vez abierto
+              el sello de seguridad de la caja, a menos que el producto presente
+              un fallo real amparado por la garantía de la marca.
+            </li>
+          </ul>
+
+          <h5 class="fw-bold text-dark mt-4 mb-3">4. Pagos y Seguridad</h5>
+          <p>Nuestra plataforma de carrito de compras es confiable:</p>
+          <ul>
+            <li class="mb-2">
+              Aceptamos Tarjetas de Crédito/Débito (Visa, Mastercard) y PayPal.
+            </li>
+            <li class="mb-2">
+              El pedido y la reducción de stock se procesarán automáticamente
+              una vez confirmado el pago exitoso en la pasarela.
+            </li>
+          </ul>
+
+          <h5 class="fw-bold text-dark mt-4 mb-3">5. Propiedad Intelectual</h5>
+          <p>
+            Todo el contenido de interfaz, código y diseño visual es propiedad
+            de AppCelulares. Queda prohibida su reproducción total o parcial sin
+            nuestra autorización previa por escrito.
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

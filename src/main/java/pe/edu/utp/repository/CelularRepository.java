@@ -9,4 +9,7 @@ import java.util.List;
 public interface CelularRepository extends JpaRepository<Celular, Long> {
     // Busca todos los celulares de un proveedor
     List<Celular> findByProveedorId(Long proveedorId);
+
+    // Búsqueda exacta de marca ignorando mayúsculas/minúsculas
+    List<Celular> findByMarcaIgnoreCase(String marca);
 }

@@ -15,45 +15,49 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private JwtRequestFilter jwtRequestFilter;
+        @Autowired
+        private JwtRequestFilter jwtRequestFilter;
 
-    // Herramienta para encriptar contraseñas en el futuro
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        // Herramienta para encriptar contraseñas en el futuro
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                // Desactivamos CSRF temporalmente para facilitar la migración a API/React
-                .csrf(csrf -> csrf.disable())
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                http
+                                // Desactivamos CSRF temporalmente para facilitar la migración a API/React
+                                .csrf(csrf -> csrf.disable())
 
-                // Reglas de autorización de rutas
-                .authorizeHttpRequests(auth -> auth
-                        // Rutas públicas (No requieren JWT)
-                        .requestMatchers("/", "/login", "/registro", "/catalogo", "/css/**", "/js/**", "/images/**",
-                                "/error")
-                        .permitAll()
+                                // Reglas de autorización de rutas
+                                .authorizeHttpRequests(auth -> auth
+                                                // Rutas públicas (No requieren JWT)
+                                                .requestMatchers("/", "/login", "/registro", "/catalogo",
+                                                                "/catalogo/marca/**", "/legal/**", "/css/**", "/js/**",
+                                                                "/images/**",
+                                                                "/error")
+                                                .permitAll()
 
-                        // Rutas protegidas por Rol
-                        .requestMatchers("/carrito/**", "/perfil/**", "/resenas/guardar", "/resenas/editar",
-                                "/resenas/eliminar/**")
-                        .hasRole("COMPRADOR")
-                        .requestMatchers("/proveedor/**").hasRole("PROVEEDOR")
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                                                // Rutas protegidas por Rol
+                                                .requestMatchers("/carrito/**", "/perfil/**", "/resenas/guardar",
+                                                                "/resenas/editar",
+                                                                "/resenas/eliminar/**")
+                                                .hasRole("COMPRADOR")
+                                                .requestMatchers("/proveedor/**").hasRole("PROVEEDOR")
+                                                .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        // Cualquier otra ruta requiere usuario autenticado
-                        .anyRequest().authenticated())
+                                                // Cualquier otra ruta requiere usuario autenticado
+                                                .anyRequest().authenticated())
 
-                // Política Stateless: Apagamos las sesiones en memoria del servidor
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                // Política Stateless: Apagamos las sesiones en memoria del servidor
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // Le decimos a Spring: "Usa mi filtro JWT antes de intentar tu lógica por
-                // defecto"
-                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+                                // Le decimos a Spring: "Usa mi filtro JWT antes de intentar tu lógica por
+                                // defecto"
+                                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 }

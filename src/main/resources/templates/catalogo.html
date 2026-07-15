@@ -19,7 +19,6 @@
         padding: 1rem;
         background-color: #f8f9fa;
       }
-      /* Se corrigió la colisión de flexbox con Bootstrap */
       .carousel-banner {
         height: 300px;
       }
@@ -109,9 +108,7 @@
         ></button>
       </div>
 
-      <!-- ========================================== -->
-      <!-- 1. CARRUSEL DE PROMOCIONES CORREGIDO -->
-      <!-- ========================================== -->
+      <!-- CARRUSEL DE PROMOCIONES -->
       <div
         id="promocionesCarousel"
         class="carousel slide mb-5 shadow-sm rounded overflow-hidden"
@@ -196,7 +193,6 @@
           <span class="visually-hidden">Siguiente</span>
         </button>
       </div>
-      <!-- ========================================== -->
 
       <!-- Buscador y Título -->
       <div class="text-center mb-5">
@@ -224,7 +220,7 @@
           class="col-12 text-center text-muted mt-5"
         >
           <i class="bi bi-inbox fs-1"></i>
-          <h4>Aún no hay celulares publicados.</h4>
+          <h4>No se encontraron celulares.</h4>
         </div>
 
         <div class="col" th:each="celular : ${celulares}">
@@ -268,7 +264,6 @@
                   <li>
                     <i class="bi bi-memory"></i> <strong>RAM:</strong>
                     <span th:text="${celular.ram}"></span>
-
                     <i
                       class="bi bi-info-circle text-primary ms-1"
                       data-bs-toggle="popover"
@@ -276,8 +271,7 @@
                       data-bs-placement="top"
                       data-bs-content="Determina la fluidez al abrir múltiples aplicaciones."
                     ></i>
-                    |
-                    <strong>Almacenamiento:</strong>
+                    | <strong>Almacenamiento:</strong>
                     <span th:text="${celular.almacenamiento}"></span>
                   </li>
                   <li>
@@ -291,7 +285,6 @@
                   <li>
                     <i class="bi bi-camera"></i> <strong>Cámara:</strong>
                     <span th:text="${celular.camaraPrincipal}"></span>
-
                     <i
                       class="bi bi-info-circle text-primary ms-1"
                       data-bs-toggle="popover"
@@ -299,8 +292,7 @@
                       data-bs-placement="top"
                       data-bs-content="Resolución del lente principal del equipo."
                     ></i>
-                    |
-                    <i class="bi bi-battery-half"></i>
+                    | <i class="bi bi-battery-half"></i>
                     <span th:text="${celular.bateria}"></span>
                   </li>
                 </ul>
@@ -383,7 +375,6 @@
                           class="form-select form-select-sm text-warning fw-bold"
                           required
                         >
-                          <!-- Emojis eliminados, reemplazados por texto para el select -->
                           <option value="5">5 Estrellas - Excelente</option>
                           <option value="4">4 Estrellas - Muy Bueno</option>
                           <option value="3">3 Estrellas - Regular</option>
@@ -439,13 +430,11 @@
                           Nombre Usuario
                         </h6>
                         <div>
-                          <!-- Emojis eliminados en la vista, reemplazados por el ícono de Bootstrap -->
                           <small
                             class="text-warning fw-bold"
                             th:text="${resena.estrellas}"
                           ></small>
                           <i class="bi bi-star-fill text-warning"></i>
-
                           <div
                             class="d-inline-block ms-2"
                             th:if="${session.usuarioId == resena.comprador.id}"
@@ -499,7 +488,6 @@
                                 style="max-width: 120px"
                                 required
                               >
-                                <!-- Emojis eliminados -->
                                 <option
                                   value="5"
                                   th:selected="${resena.estrellas == 5}"
@@ -642,9 +630,114 @@
       </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- ========================================== -->
+    <!-- NUEVO FOOTER CORPORATIVO -->
+    <!-- ========================================== -->
+    <footer class="bg-white border-top pt-5 pb-3">
+      <div class="container">
+        <div class="row">
+          <!-- Columna 1: Branding y Descripción -->
+          <div class="col-lg-4 col-md-6 mb-4">
+            <h4 class="fw-bold text-dark">
+              <i class="bi bi-phone text-primary"></i> AppCelulares
+            </h4>
+            <p class="text-muted small mt-3 pe-4">
+              En AppCelulares llevamos la mejor tecnología directo a tus manos.
+              Ofrecemos equipos de vanguardia con calidad, estilo y garantía,
+              brindando una experiencia de compra rápida, segura y confiable en
+              todo el país.
+            </p>
+          </div>
 
-    <!-- Inicializador de Popovers -->
+          <!-- Columna 2: Productos (Enlaces funcionales) -->
+          <div class="col-lg-2 col-md-6 mb-4">
+            <h6 class="fw-bold text-dark text-uppercase mb-3">Productos</h6>
+            <ul class="list-unstyled">
+              <li class="mb-2">
+                <a
+                  th:href="@{/catalogo/marca/Apple}"
+                  class="text-muted text-decoration-none"
+                  >Apple</a
+                >
+              </li>
+              <li class="mb-2">
+                <a
+                  th:href="@{/catalogo/marca/Samsung}"
+                  class="text-muted text-decoration-none"
+                  >Samsung</a
+                >
+              </li>
+              <li class="mb-2">
+                <a
+                  th:href="@{/catalogo/marca/Xiaomi}"
+                  class="text-muted text-decoration-none"
+                  >Xiaomi</a
+                >
+              </li>
+              <li class="mb-2">
+                <a
+                  th:href="@{/catalogo/marca/Motorola}"
+                  class="text-muted text-decoration-none"
+                  >Motorola</a
+                >
+              </li>
+              <li class="mt-3">
+                <a
+                  th:href="@{/catalogo}"
+                  class="text-danger fw-bold text-decoration-none"
+                  >Ver todo el catálogo &rarr;</a
+                >
+              </li>
+            </ul>
+          </div>
+          <!-- Columna 4: Legal -->
+          <div class="col-lg-2 col-md-6 mb-4">
+            <h6 class="fw-bold text-dark text-uppercase mb-3">Legal</h6>
+            <ul class="list-unstyled">
+              <li class="mb-2">
+                <a
+                  th:href="@{/legal/politicas}"
+                  class="text-muted text-decoration-none"
+                  ><i class="bi bi-shield-check"></i> Políticas de Privacidad</a
+                >
+              </li>
+              <li class="mb-2">
+                <a
+                  th:href="@{/legal/terminos}"
+                  class="text-muted text-decoration-none"
+                  ><i class="bi bi-file-earmark-text"></i> Términos de
+                  Servicio</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <!-- Columna 5: Contacto -->
+          <div class="col-lg-2 col-md-6 mb-4">
+            <h6 class="fw-bold text-dark text-uppercase mb-3">Contacto</h6>
+            <ul class="list-unstyled">
+              <li class="mb-2 text-muted">
+                <i class="bi bi-telephone"></i> +51 987 654 321
+              </li>
+              <li class="mb-2 text-muted">
+                <i class="bi bi-envelope"></i> info@appcelulares.pe
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <hr class="text-muted mb-4 mt-2" />
+
+        <!-- Copyright -->
+        <div class="row align-items-center">
+          <div class="col-md-12 text-center text-muted small">
+            &copy; 2026 AppCelulares. Todos los derechos reservados.
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         var popoverTriggerList = [].slice.call(

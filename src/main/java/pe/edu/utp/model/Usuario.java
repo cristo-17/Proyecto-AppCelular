@@ -44,6 +44,12 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FormaPago> formasPago;
 
+    @OneToMany(mappedBy = "comprador", cascade = CascadeType.ALL)
+    private List<Pedido> misCompras;
+
+    @OneToMany(mappedBy = "proveedor", cascade = CascadeType.ALL)
+    private List<Pedido> ventasRecibidas;
+
     public Usuario() {
     }
 
@@ -109,6 +115,22 @@ public class Usuario {
 
     public void setFormasPago(List<FormaPago> formasPago) {
         this.formasPago = formasPago;
+    }
+
+    public List<Pedido> getMisCompras() {
+        return misCompras;
+    }
+
+    public void setMisCompras(List<Pedido> misCompras) {
+        this.misCompras = misCompras;
+    }
+
+    public List<Pedido> getVentasRecibidas() {
+        return ventasRecibidas;
+    }
+
+    public void setVentasRecibidas(List<Pedido> ventasRecibidas) {
+        this.ventasRecibidas = ventasRecibidas;
     }
 
 }
